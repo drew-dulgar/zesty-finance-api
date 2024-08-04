@@ -9,7 +9,7 @@ class AssetClassModel extends BaseModel {
   } = {}) {
     const query = 
       this.client(this.table)
-      .select('id', 'code', 'name', 'active', 'deleted');
+        .select('id', 'code', 'name', 'active', 'deleted');
 
     if (typeof id !== 'undefined') {
       query.where({ id });
