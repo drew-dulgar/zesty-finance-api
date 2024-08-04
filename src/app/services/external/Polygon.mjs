@@ -14,12 +14,8 @@ class Polygon {
   buildUrl(endpoint, queryParams = {}) {
     let url = path.join(this.url, endpoint);
 
-    if (!queryParams?.apiKey) {
-      queryParams.apiKey = this.apiKey;
-    }
-
     if (Object.keys(queryParams).length > 0) {
-      url += `?${new URLSearchParams(queryParams)}`
+      url += `?${new URLSearchParams(queryParams)}`;
     }
 
     return url;
@@ -28,27 +24,35 @@ class Polygon {
   async fetch(endpoint, queryParams = {}) {
     try {
       const url = this.buildUrl(endpoint, queryParams);
+      const headers = {
+        Authorization: `Bearer ${this.apiKey}`
+      };
 
-      const response = await fetch(url);
+      const response = await fetch(url, {
+        headers
+      });
+
       const results = await response.json();
-
-      return results;
-    } catch (error) {
-      return {
-        status: 'ERROR',
-        error: error.message,
+      
+      if (results.status === 'OK') {
+        return results;
       }
+
+      throw new Error('Polygon fetch Error', { cause: results });
+    } catch (error) {
+      console.error(error);
+      throw error;
     }
   }
 
   async getTickers() {
 
   }
-  
+
   async getTicker(ticker) {
     const results = await this.fetch(`v3/reference/tickers/${ticker}`);
 
-    return this.results(results);
+    return results;
   }
 
   async getTickerTypes(assetClass = 'stocks', local = 'us') {
@@ -57,18 +61,9 @@ class Polygon {
       local,
     });
 
-    return this.results(results);
+    return results;
   }
 
-  results(results) {
-    if (results.status === 'OK') {
-      return results;
-    }
-
-    console.error(results);
-
-    return null;
-  }
 }
 
 export default new Polygon();

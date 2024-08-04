@@ -1,12 +1,6 @@
 import express from 'express';
 import { NPM_PACKAGE_VERSION } from '../lib/env.mjs';
-import User from './models/user/User.mjs';
-import {
-  TickerService, 
-  TickerServiceCache,
-  TickerTypesService,
-  TickerTypesServiceCache,
-} from './services/index.mjs';
+import AssetClassModel from './modules/AssetClass/AssetClassModel.mjs';
 
 const router = express.Router();
 
@@ -16,15 +10,22 @@ router.get('/', (request, response) => {
 
 router.get('/user/:id', async (request, response, next) => {
   try {
-    const user = await User.getOne(request.params.id);
-    const ticker = await new TickerService().get('AAPL');
-    const tickerTypes = await new TickerTypesService().get();
+
+    await AssetClassModel.update({
+      code: 'zzzzzzf4',
+      name: 'Testing zupadate4',
+    }, {
+      id: 6,
+    });
+
+    const [user, assetClasses] = await Promise.all([
+      AssetClass.getOne({id: 6})
+    ]);
 
     if (user) {
       response.status(200).json({
         user,
-        ticker,
-        tickerTypes
+        assetClasses
       });
     } else {
       next();
@@ -52,8 +53,8 @@ router.get('/health', (request, response, next) => {
   response.status(200).json({
     version: NPM_PACKAGE_VERSION,
     cache: {
-      TickerServiceCache: TickerServiceCache.stats(),
-      TickerTypesServiceCache: TickerTypesServiceCache.stats(),
+      TickerServiceCache: TickerService.cache.stats(),
+      TickerTypesServiceCache: TickerTypesService.cache.stats(),
     }
   });
 })

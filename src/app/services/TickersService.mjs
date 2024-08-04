@@ -2,20 +2,20 @@ import { DateTime } from 'luxon';
 import Polygon from "./external/Polygon.mjs";
 import CacheService from "./CacheService.mjs";
 
-const TickerServiceCache = new CacheService({ stdTTL: 86400 });
-
 class TickerService {
-  key;
-  ticker;
+  cache;
+  
+  constructor() {
+    super();
+    
+    this.cache = new CacheService({ stdTTL: 86400 });
 
-  constructor(ticker) {
-    this.key = `ticker_${ticker}`;
-    this.ticker = ticker;
+    return this;
   }
 
-  async get(cache = true) {
-    if (cache) {
-      const tickerCache = TickerServiceCache.get(this.key);
+  async get() {
+    if (this.cacheEnabled) {
+      const tickerCache = this.cache.get(this.key);
 
       if (tickerCache) {
         return tickerCache;
@@ -25,7 +25,7 @@ class TickerService {
     const response = await this.fetchTicker();
 
     if (cache && response) {
-      TickerServiceCache.set(this.key, response);
+      this.cache.set(this.key, response);
     }
 
     return response;
@@ -38,5 +38,4 @@ class TickerService {
   }
 }
 
-export default TickerService;
-export { TickerServiceCache };
+export default new TickerService();

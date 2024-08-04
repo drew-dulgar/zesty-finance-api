@@ -1,3 +1,4 @@
+import knex from 'knex';
 import pg from 'pg';
 
 // Zesty Db connection
@@ -8,13 +9,18 @@ import {
 const { ZESTY_DB } = DB_CONNECTIONS;
 
 const clients = {
-  zestyDb: new pg.Pool({
-    host: ZESTY_DB.host,
-    port: ZESTY_DB.port,
-    database: ZESTY_DB.database,
-    user: ZESTY_DB.user,
-    password: ZESTY_DB.password
+  zestyDb: knex({
+    client: 'pg',
+    connection: {
+      host: ZESTY_DB.host,
+      port: ZESTY_DB.port,
+      database: ZESTY_DB.database,
+      user: ZESTY_DB.user,
+      password: ZESTY_DB.password,
+      //ssl: ZESTY_DB_SSL ? { rejectUnauthorized: false } : false,
+    }
   })
-};
+}
+
 
 export { clients };
