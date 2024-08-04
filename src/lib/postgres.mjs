@@ -1,5 +1,4 @@
 import knex from 'knex';
-import pg from 'pg';
 
 // Zesty Db connection
 import {

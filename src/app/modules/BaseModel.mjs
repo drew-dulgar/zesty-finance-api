@@ -1,4 +1,4 @@
-import { clients } from "../../lib/postgres.mjs";
+import { clients } from '../../lib/postgres.mjs';
 
 class BaseModel {
   table;

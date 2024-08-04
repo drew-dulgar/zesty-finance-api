@@ -1,6 +1,6 @@
 import { DateTime } from 'luxon';
-import Polygon from "./external/Polygon.mjs";
-import CacheService from "./CacheService.mjs";
+import Polygon from './external/Polygon.mjs';
+import CacheService from './CacheService.mjs';
 import BaseService from './BaseService.mjs';
 
 class TickerTypesService extends BaseService {
