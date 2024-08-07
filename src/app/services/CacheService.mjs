@@ -1,5 +1,5 @@
 import NodeCache from 'node-cache';
-import { APP_CACHE } from '../../lib/env.mjs';
+import { APP_CACHE } from '../config/env.mjs';
 
 class CacheService {
   constructor(args = {}) {

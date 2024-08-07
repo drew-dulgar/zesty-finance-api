@@ -1,7 +1,7 @@
 import { DateTime } from 'luxon';
 import Polygon from './external/Polygon.mjs';
-import CacheService from './CacheService.mjs';
-import BaseService from './BaseService.mjs';
+import CacheService from '../modules/cache/CacheService.mjs';
+import BaseService from '../modules/BaseService.mjs';
 
 class TickerTypesService extends BaseService {
   cache;
@@ -14,37 +14,43 @@ class TickerTypesService extends BaseService {
     return this;
   }
 
-  async get(assetClass = 'stocks', local = 'us') {
-    try {
-      const key = `ticker_types_${assetClass}_${local}`;
+  async syncronize() {
+    const tickerTypesSource = await PolygonService.getTickerTypes();
 
-      if (this.cacheEnabled) {
-        const tickerTypesCache = this.cache.get(key);
+    for (const tickerTypeSource of tickerTypesSource.results) {
+      let assetClassId;
+      let localeId;
 
-        if (tickerTypesCache) {
-          return tickerTypesCache;
-        }
+      const assetClass = await AssetClassService.getOne({ code: tickerTypeSource.asset_class });
+      const locale = await LocaleService.getOne({ code: tickerTypeSource.locale });
+
+      if (assetClass) {
+        assetClassId = assetClass.id;
+      } else {
+        const createAssetClass = await AssetClassService.create({ code: tickerTypeSource.asset_class, active: true });
+        assetClassId = createAssetClass[0].id;
       }
 
-      const response = await this.fetchTickerTypes(assetClass, local);
-
-      if (this.cacheEnabled && response) {
-        this.cache.set(key, response);
+      if (locale) {
+        localeId = locale.id;
+      } else {
+        const createLocale = await LocaleService.create({ code: tickerTypeSource.locale, active: true });
+        localeId = createLocale[0].id;
       }
 
-      return response;
-    } catch (error) {
-      throw error;
+      await this.create({
+        assetClassId,
+        localeId,
+        code: tickerTypeSource.code,
+        description: tickerTypeSource.description,
+        active: true,
+      }, true);
     }
+
+    return tickerTypesSource;
+
   }
 
-  async fetchTickerTypes(assetClass = 'stocks', local = 'us') {
-    const response = await this.fetchWithRetry(
-      () => Polygon.getTickerTypes(assetClass, local)
-    );
-
-    return response;
-  }
 }
 
 export default new TickerTypesService();

@@ -1,8 +1,9 @@
 
 import express from 'express';
 import bodyParser from 'body-parser';
-import routes from '../app/routes.mjs';
+import routes from '../routes.mjs';
 import { ENVIRONMENT } from './env.mjs';
+import logger from './logger.mjs';
 
 const app = express();
 
@@ -15,7 +16,7 @@ app.use(
 
 app.use(routes);
 
-app.use((req, res, next) => {
+app.use((req, res) => {
   res.status(404).json({
     status: 404,
     message: 'The requested resource could not be found.'
@@ -24,19 +25,16 @@ app.use((req, res, next) => {
 
 // Final error handler
 app.use((error, request, response, next) => {
+  // log error?
+  logger.error(error);
 
   if (ENVIRONMENT === 'production') {
-    // log error?
-    console.error(error.message);
-
     response.status(500).json({
       status: 500,
       message: 'Whoops, looks like something went wrong!'
     });
 
   } else {
-    console.error(error);
-
     response.status(500).json({
       status: 500,
       error: error?.message || '',

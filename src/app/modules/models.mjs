@@ -1,1 +1,0 @@
-export { default as AssetClassModel } from './AssetClass/AssetClassModel.mjs';

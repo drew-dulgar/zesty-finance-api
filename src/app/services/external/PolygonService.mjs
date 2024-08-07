@@ -1,8 +1,8 @@
 import path from 'path';
 import fetch from 'node-fetch';
-import { POLYGON_URL, POLYGON_API_KEY } from '../../../lib/env.mjs';
+import { POLYGON_URL, POLYGON_API_KEY } from '../../../config/env.mjs';
 
-class Polygon {
+class PolygonService {
   url;
   apiKey;
 
@@ -66,4 +66,4 @@ class Polygon {
 
 }
 
-export default new Polygon();
+export default new PolygonService();

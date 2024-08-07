@@ -1,4 +1,5 @@
 import knex from 'knex';
+import logger from './logger.mjs';
 
 // Zesty Db connection
 import {
@@ -21,5 +22,12 @@ const clients = {
   })
 }
 
+clients.zestyDb.on('query', (knex) => {
+  logger.info(knex.sql);
+});
+
+clients.zestyDb.on('query-error', (error, knex) => {
+  logger.error(error);
+});
 
 export { clients };
