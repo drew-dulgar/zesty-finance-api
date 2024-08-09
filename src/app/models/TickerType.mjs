@@ -4,24 +4,31 @@ import { AssetClass, Locale } from './index.mjs';
 class TickerType extends Model {
   static tableName = 'ticker_types';
 
-  static relationMappings = {
+  static relationMappings = () => ({
     assetClass: {
       relation: Model.BelongsToOneRelation,
       modelClass: AssetClass,
       join: {
-        from: 'ticker_types.asset_class_id',
-        to: 'asset_classes.id'
+        from: `${TickerType.tableName}.asset_class_id`,
+        to: `${AssetClass.tableName}.id`
       }
     },
     locale: {
       relation: Model.BelongsToOneRelation,
       modelClass: Locale,
       join: {
-        from: 'ticker_types.locale_id',
-        to: 'locales.id'
+        from: `${TickerType.tableName}.locale_id`,
+        to: `${Locale.tableName}.id`
       }
     }
-  };
-}
+  });
 
+  $beforeInsert() {
+    this.created_at = new Date().toISOString();
+  }
+
+  $beforeUpdate() {
+    this.updated_at = new Date().toISOString();
+  }
+}
 export default TickerType;

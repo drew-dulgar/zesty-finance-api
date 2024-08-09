@@ -1,6 +1,6 @@
 import express from 'express';
 import { NPM_PACKAGE_VERSION } from './config/env.mjs';
-import {TickerType} from './models/index.mjs';
+import syncronize from '../utils/syncronize.mjs';
 
 const router = express.Router();
 
@@ -10,14 +10,22 @@ router.get('/', (request, response) => {
 
 router.get('/user/:id', async (request, response, next) => {
   try {
-    
-    const markets = await TickerType.query()
-    .withGraphJoined({
-      assetClass: true,
-      locale: true,
-    }, { joinOperation: 'innerJoin'});
+    const sourceData = [
+      {id: 1, value: 'foo', name: 'bob'},
+      {id: 2, value: 'update_entry', name: 'frank'},
+      {id: 3, value: 'bar', name: 'timx'},
+      {id: 5, value: 'new_entry', name: 'sara'}
+    ];
+    const targetData = [
+      {id: 1, value: 'foo', name: 'bob',},
+      {id: 2, value: 'bob', name: 'frank'},
+      {id: 3, value: 'bar', name: 'tim',},
+      {id: 4, value: 'delete_entry', name: 'sara'}
+    ];
 
-      response.status(200).json({markets});
+      response.status(200).json({sync: syncronize(sourceData, targetData, 'id', 'id', {
+        name: 'name',
+      })});
 
   } catch (e) {
     next(e);

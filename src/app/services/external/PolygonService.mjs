@@ -1,6 +1,6 @@
 import path from 'path';
 import fetch from 'node-fetch';
-import { POLYGON_URL, POLYGON_API_KEY } from '../../../config/env.mjs';
+import { POLYGON_URL, POLYGON_API_KEY } from '../../config/env.mjs';
 
 class PolygonService {
   url;
@@ -40,7 +40,6 @@ class PolygonService {
 
       throw new Error('Polygon fetch Error', { cause: results });
     } catch (error) {
-      console.error(error);
       throw error;
     }
   }

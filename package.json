@@ -6,9 +6,9 @@
   "type": "module",
   "scripts": {
     "dev": "dotenvx run -f .env.local -- nodemon src/index.mjs",
-    "x": "nodemon src/index.mjs",
-    "start": "node src/index.mjs",
-    "test": "mocha ./src/tests/*.spec.mjs",
+    "start": "dotenvx run -f .env.production -- node src/index.mjs",
+    "test": "mocha ./src/tests/**/*.spec.mjs",
+    "test:watch": "npm run test --watch",
     "lint": "eslint",
     "lint:fix": "eslint --fix"
   },
@@ -18,7 +18,7 @@
     "@dotenvx/dotenvx": "^1.6.4",
     "express": "^4.19.2",
     "knex": "^3.1.0",
-    "lodash": "^4.17.21",
+    "lodash-es": "^4.17.21",
     "luxon": "^3.4.4",
     "node-cache": "^5.1.2",
     "node-fetch": "^3.3.2",
