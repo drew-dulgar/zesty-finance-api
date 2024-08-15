@@ -1,9 +1,10 @@
 import { DateTime } from 'luxon';
+import Syncronizer from '../../utils/syncronizer.mjs';
 import { AssetClass, Locale, TickerType } from '../models/index.mjs';
 import PolygonService from './external/PolygonService.mjs'
 import CacheService from './CacheService.mjs';
 import BaseService from './BaseService.mjs';
-import syncronize from '../../utils/syncronize.mjs';
+
 
 class TickerTypeService extends BaseService {
   cache;
@@ -80,7 +81,7 @@ class TickerTypeService extends BaseService {
   }
 
   fetchTickerTypesFromOrigin() {
-    return PolygonService.getTickerTypes();
+    return this.fetchWithRetry(() => PolygonService.getTickerTypes());
   }
 
   async syncronize() {
@@ -91,52 +92,67 @@ class TickerTypeService extends BaseService {
 
       // Load from our source
       const tickerTypesSource = await this.fetchTickerTypesFromOrigin();
-      const target = await this.get();
-   
-      return syncronize(tickerTypesSource.results, target, 'code', 'code');
-      /*
-      for (const tickerTypeSource of tickerTypesSource.results) {
-        let assetClassId;
-        let localeId;
+      const tickerTypesTarget = await this.get();
 
-        const assetClass = assetClasses.find(assetClass => assetClass.code === tickerTypeSource.asset_class);
+      const syncronizer = new Syncronizer({
+        sourceKeys: 'code',
+        sourceData: tickerTypesSource.results,
+        targetKeys: 'code',
+        targetData: tickerTypesTarget
+      });
 
-        if (assetClass) {
-          assetClassId = assetClass.id;
-        } else {
-          const createAssetClass = await AssetClass.query().returning('*').insert({
-            code: tickerTypeSource.asset_class,
-            active: true
-          });
+      syncronizer.setValues(async (values = {}) => {
+        const { asset_class: assetClassCode, locale: localeCode, ...rest } = values;
+        const nextValues = {
+          ...rest
+        };
 
-          assetClassId = createAssetClass.id;
 
-          assetClasses.push(createAssetClass);
+        if (assetClassCode) {
+          const assetClass = assetClasses.find(assetClass => assetClass.code === assetClassCode);
+
+          if (assetClass) {
+            nextValues.asset_class_id = assetClass.id;
+          } else {
+            const createAssetClass = await AssetClass.query().returning('*').insert({
+              code: assetClassCode,
+              active: true
+            });
+  
+            nextValues.asset_class_id = createAssetClass.id;
+            assetClasses.push(createAssetClass);
+          }
         }
 
-        const locale = locales.find(locale => locale.code === tickerTypeSource.locale);
-        if (locale) {
-          localeId = locale.id;
-        } else {
-          const createLocale = await Locale.query().returning('*').insert({
-            code: tickerTypeSource.locale,
-            active: true
-          });
-
-          localeId = createLocale.id;
-          locales.push(createLocale);
+        if (localeCode) {
+          const locale = locales.find(locale => locale.code === localeCode);
+          if (locale) {
+            nextValues.locale_id = locale.id;
+          } else {
+            const createLocale = await Locale.query().returning('*').insert({
+              code: localeCode,
+              active: true
+            });
+  
+            nextValues.locale_id = createLocale.id;
+            locales.push(createLocale);
+          }
         }
 
-        await TickerType.query().insert({
-          asset_class_id: assetClassId,
-          locale_id: localeId,
-          code: tickerTypeSource.code,
-          description: tickerTypeSource.description,
-          active: true,
-        })
-      }*/
+        return nextValues;
+      });
 
-      return true;
+
+      const {create, update} = await syncronizer.result({
+        asset_class: 'assetClass.code',
+        locale: 'locale.code',
+        description: 'description',
+      });
+
+
+
+
+      return {create, update};
 
     } catch (error) {
       throw error;

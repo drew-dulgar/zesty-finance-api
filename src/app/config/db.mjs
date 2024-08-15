@@ -1,5 +1,14 @@
 import knex from 'knex';
 import logger from './logger.mjs';
+import pg from 'pg';
+
+// override next date handling
+const { types } = pg;
+
+// always assume value coming from the database is GMT
+const timezoneParser = (val) => new Date(val + 'Z').toUTCString();
+types.setTypeParser(types.builtins.TIMESTAMPTZ, timezoneParser);
+types.setTypeParser(types.builtins.TIMESTAMP, timezoneParser);
 
 // Zesty Db connection
 import {
@@ -18,7 +27,7 @@ const clients = {
       user: ZESTY_DB.user,
       password: ZESTY_DB.password,
       //ssl: ZESTY_DB_SSL ? { rejectUnauthorized: false } : false,
-    }
+    },
   })
 }
 

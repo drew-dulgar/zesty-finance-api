@@ -15,6 +15,13 @@ class PolygonService {
     let url = path.join(this.url, endpoint);
 
     if (Object.keys(queryParams).length > 0) {
+
+      Object.keys(queryParams).forEach((key) => {
+        if (typeof queryParams[key] === 'undefined') {
+          delete queryParams[key];
+        }
+      });
+
       url += `?${new URLSearchParams(queryParams)}`;
     }
 
@@ -33,7 +40,7 @@ class PolygonService {
       });
 
       const results = await response.json();
-      
+
       if (results.status === 'OK') {
         return results;
       }
@@ -44,23 +51,36 @@ class PolygonService {
     }
   }
 
-  async getTickers() {
+  getTickers({ tickerType, market, active = true, sort = 'ticker', order = 'asc', limit = 1000, next_url } = {}) {
 
+    if (next_url) {
+      const url = URL.parse(next_url);
+
+      return this.fetch('/v3/reference/tickers', {
+        cursor: url.searchParams.get('cursor'),
+      });
+
+    }
+
+    return this.fetch('/v3/reference/tickers', {
+      type: tickerType,
+      market: market,
+      active,
+      sort,
+      order,
+      limit
+    });
   }
 
-  async getTicker(ticker) {
-    const results = await this.fetch(`v3/reference/tickers/${ticker}`);
-
-    return results;
+  getTicker(ticker) {
+    return this.fetch(`v3/reference/tickers/${ticker}`);
   }
 
-  async getTickerTypes(assetClass = 'stocks', local = 'us') {
-    const results = await this.fetch('v3/reference/tickers/types', {
+  getTickerTypes(assetClass = 'stocks', local = 'us') {
+    return this.fetch('v3/reference/tickers/types', {
       asset_class: assetClass,
       local,
     });
-
-    return results;
   }
 
 }

@@ -1,40 +1,184 @@
 import { DateTime } from 'luxon';
+import { padStart } from 'lodash-es';
 import BaseService from './BaseService.mjs';
-import CacheService from './CacheService.mjs';
+import Syncronizer from '../../utils/syncronizer.mjs';
+import { Ticker, Locale, Market, TickerType } from '../models/index.mjs';
+import PolygonService from './external/PolygonService.mjs';
 
 class TickerService extends BaseService {
   cache;
-  
+
   constructor() {
     super();
-    
-    this.cache = new CacheService({ stdTTL: 86400 });
+
+    //this.cache = new CacheService({ stdTTL: 86400 });
 
     return this;
   }
 
-  async get() {
-    if (this.cacheEnabled) {
-      const tickerCache = this.cache.get(this.key);
+  get({
+    id,
+    ticker,
+  } = {}) {
 
-      if (tickerCache) {
-        return tickerCache;
+    const query = Ticker.query()
+      .withGraphJoined({
+        locale: true,
+        market: true,
+        type: true,
+      }, { joinOperation: 'innerJoin' });
+
+    if (typeof id !== 'undefined') {
+      if (Array.isArray(id)) {
+        query.where(`${Ticker.tableName}.id`, id);
+      } else {
+        query.whereIn(`${Ticker.tableName}.id`, id);
       }
     }
 
-    const response = await this.fetchTicker();
-
-    if (cache && response) {
-      this.cache.set(this.key, response);
+    if (typeof ticker !== 'undefined') {
+      if (Array.isArray(ticker)) {
+        query.where(`${Ticker.tableName}.ticker`, ticker);
+      } else {
+        query.whereIn(`${Ticker.tableName}.ticker`, ticker);
+      }
     }
 
-    return response;
+    return query;
   }
 
-  async fetchTicker() {
-    const response = await Polygon.getTicker(this.ticker);
+  getOne(id) {
+    return this.get().findById(id);
+  }
 
-    return response;
+  fetchTickersFromOrigin() {
+    return this.fetchWithRetry(() => PolygonService.getTickers({ tickerType: 'CS', market: 'stocks' }));
+  }
+
+  async syncronize() {
+    // Load the reference data
+    const [tickersSource, tickersTarget, markets, locales, tickerTypes] = await Promise.all([
+      this.fetchTickersFromOrigin(),
+      this.get(),
+
+      // reference data
+      Market.query(),
+      Locale.query(),
+      TickerType.query()
+    ]);
+
+    const syncronizer = new Syncronizer({
+      sourceKeys: 'composite_figi',
+      sourceData: tickersSource.results.filter(ticker => ticker?.cik && ticker?.componsite_figi),
+      targetKeys: 'composite_figi',
+      targetData: tickersTarget
+    });
+
+    const { create, update } = await syncronizer.result([
+      {
+        key: 'locale_id',
+        source: 'locale',
+        target: 'locale.code',
+        transform: async (localeCode) => {
+          const locale = locales.find(locale => locale.code === localeCode);
+          if (locale) {
+            return locale.id;
+          } else {
+            const createLocale = await Locale.query().returning('*').insert({
+              code: localeCode,
+              active: true
+            });
+  
+            locales.push(createLocale);
+
+            return createLocale.id;
+          }
+        }
+      },
+      {
+        key: 'market_id',
+        source: 'market',
+        target: 'market.code',
+        transform: async (marketCode) => {
+          const market = markets.find(market => market.code === marketCode);
+          if (market) {
+            return market.id;
+          } else {
+            const createMarket = await Market.query().returning('*').insert({
+              code: marketCode,
+              active: true
+            });
+  
+            markets.push(createMarket);
+
+            return createMarket.id;
+          }
+        }
+      },
+      {
+        key: 'ticker_type_id',
+        source: 'type',
+        target: 'type.code',
+        transform: (tickerTypeCode) => {
+          const tickerType = tickerTypes.find(tickerType => tickerType.code === tickerTypeCode);
+
+          return tickerType?.id || 0;
+        },
+      },
+      {
+        key: 'ticker',
+      },
+      {
+        key: 'name',
+      },
+      {
+        key: 'cik',
+        transform: (cik) => cik ? parseInt(cik) : 0
+      },
+      {
+        key: 'currency_name',
+      },
+      {
+        key: 'primary_exchange',
+      },
+      {
+        key: 'delisted',
+      },
+      {
+        key: 'last_updated',
+        source: 'last_updated_utc',
+        transform: (date) => new Date(date).toUTCString(),
+      }
+    ]);
+
+    const errors = [];
+
+    const createTickers = create.map(async ({ values }) => {
+      try { 
+        return await Ticker.query().insert(values);
+      } catch (error) {
+        errors.push({
+          values,
+          error: error.message
+        });
+      }
+    });
+
+    const updateTickers = update.map(async ({keys, values}) => {
+      try { 
+        return await Ticker.query().update(values).where(keys);
+      } catch(error) {
+        errors.push({
+          keys,
+          values,
+          error,
+        });
+      }
+    });
+
+    await Promise.all([...createTickers, ...updateTickers]);
+
+    return { errors, create, update };
   }
 }
 
