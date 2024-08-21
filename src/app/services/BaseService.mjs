@@ -3,6 +3,8 @@ class BaseService {
 
   constructor(cacheEnabled = true) {
     this.cacheEnabled = cacheEnabled;
+
+    return this;
   }
 
   setCacheEnabled(cacheEnabled) {
@@ -11,6 +13,12 @@ class BaseService {
 
   getCacheEnabled() {
     return this.cacheEnabled;
+  }
+
+  columns(tableName, ...columns) {
+    
+    return columns.map(column => `${tableName}.${column}`);
+    
   }
 
   fetchWithRetry(fetchFunction = new Promise(), maxAttempts = 6, baseDelayMs = 2000, randomness = .05) {

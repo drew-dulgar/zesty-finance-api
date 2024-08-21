@@ -7,8 +7,13 @@ const { types } = pg;
 
 // always assume value coming from the database is GMT
 const timezoneParser = (val) => new Date(val + 'Z').toUTCString();
+const numericParser = (val) => parseFloat(val);
+
 types.setTypeParser(types.builtins.TIMESTAMPTZ, timezoneParser);
 types.setTypeParser(types.builtins.TIMESTAMP, timezoneParser);
+
+types.setTypeParser(types.builtins.NUMERIC, numericParser);
+
 
 // Zesty Db connection
 import {

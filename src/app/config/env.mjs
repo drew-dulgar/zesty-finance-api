@@ -1,9 +1,11 @@
-export const ENVIRONMENT = process.env.NODE_ENV || 'development';
+export const ENVIRONMENT = process.env.NODE_ENV || 'production';
 
 // Export all environment vars needed throughout the app
 export const APP_PORT = process.env.APP_PORT || 3000;
 export const APP_CACHE = process.env.APP_CACHE === 'true' ? true : false;
 export const APP_LOG_LEVEL = process.env.APP_LOG_LEVEL || 'error';
+
+export const SECRET_SESSION = process.env.SECRET_SESSION;
 
 export const NPM_PACKAGE_VERSION = process.env.npm_package_version || null;
 

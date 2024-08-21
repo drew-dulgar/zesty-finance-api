@@ -51,14 +51,17 @@ class TickerService extends BaseService {
     return this.get().findById(id);
   }
 
-  fetchTickersFromOrigin() {
-    return this.fetchWithRetry(() => PolygonService.getTickers({ tickerType: 'CS', market: 'stocks' }));
+  fetchTickersFromOrigin(nextUrl) {
+    if (nextUrl) {
+      return this.fetchWithRetry(() => PolygonService.getTickers({ nextUrl }));
+    } else {
+      return this.fetchWithRetry(() => PolygonService.getTickers({ tickerType: 'CS', market: 'stocks' }));
+    }
   }
 
   async syncronize() {
     // Load the reference data
-    const [tickersSource, tickersTarget, markets, locales, tickerTypes] = await Promise.all([
-      this.fetchTickersFromOrigin(),
+    const [tickersTarget, markets, locales, tickerTypes] = await Promise.all([
       this.get(),
 
       // reference data
@@ -67,12 +70,30 @@ class TickerService extends BaseService {
       TickerType.query()
     ]);
 
+    let nextUrl = '';
+    const errors = [];
+
     const syncronizer = new Syncronizer({
       sourceKeys: 'composite_figi',
-      sourceData: tickersSource.results.filter(ticker => ticker?.cik && ticker?.componsite_figi),
+      //sourceData: tickersSource.results.filter(ticker => ticker?.cik && ticker?.componsite_figi),
       targetKeys: 'composite_figi',
       targetData: tickersTarget
     });
+
+    do {
+      // if there is another page of data, store it to loop one more time 
+      nextUrl = tickersSource?.next_url || '';
+
+      // grab the current pages data
+      const tickersSource = await this.fetchTickersFromOrigin(nextUrl);
+
+      syncronizer.setSourceData(tickersSource);
+
+
+
+    } while (nextUrl)
+
+
 
     const { create, update } = await syncronizer.result([
       {
@@ -150,8 +171,6 @@ class TickerService extends BaseService {
         transform: (date) => new Date(date).toUTCString(),
       }
     ]);
-
-    const errors = [];
 
     const createTickers = create.map(async ({ values }) => {
       try { 

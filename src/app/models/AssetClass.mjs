@@ -16,7 +16,6 @@ class AssetClass extends Model {
   });
 
 
-
   $beforeInsert() {
     this.name = this.name || this.code;
   }

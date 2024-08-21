@@ -146,8 +146,6 @@ class Syncronizer {
       } else if (!isEqual(sourceValues, targetValues)) {
         const values = sourceValues;
 
-        console.log(sourceValues, targetValues);
-      
         update.push({
           keys: sd.keys,
           values

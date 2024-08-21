@@ -24,11 +24,11 @@ class TickerType extends Model {
   });
 
   $beforeInsert() {
-    this.created_at = new Date().toISOString();
+    this.created_at = new Date().toUTCString();
   }
 
   $beforeUpdate() {
-    this.updated_at = new Date().toISOString();
+    this.updated_at = new Date().toUTCString();
   }
 }
 export default TickerType;

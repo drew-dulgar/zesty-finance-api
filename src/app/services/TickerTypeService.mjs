@@ -86,14 +86,16 @@ class TickerTypeService extends BaseService {
 
   async syncronize() {
     try {
-      // Load the reference data
-      const assetClasses = await AssetClass.query();
-      const locales = await Locale.query();
 
-      // Load from our source
-      const tickerTypesSource = await this.fetchTickerTypesFromOrigin();
-      const tickerTypesTarget = await this.get();
+      const [tickerTypesSource, tickerTypesTarget, assetClasses, locales] = await Promise.all([
+        this.fetchTickerTypesFromOrigin(),
+        this.get(),
 
+        // Load the reference data
+        AssetClass.query(),
+        Locale.query()
+      ]);
+      
       const syncronizer = new Syncronizer({
         sourceKeys: 'code',
         sourceData: tickerTypesSource.results,
@@ -101,56 +103,53 @@ class TickerTypeService extends BaseService {
         targetData: tickerTypesTarget
       });
 
-      syncronizer.setValues(async (values = {}) => {
-        const { asset_class: assetClassCode, locale: localeCode, ...rest } = values;
-        const nextValues = {
-          ...rest
-        };
+      const {create, update} = await syncronizer.result([
+        {
+          key: 'asset_class_id',
+          source: 'asset_class',
+          target: 'assetClass.code',
+          transform: async (assetClassCode) => {
+            const assetClass = assetClasses.find(assetClass => assetClass.code === assetClassCode);
 
+            if (assetClass) {
+              return assetClass.id;
+            } else {
+              const createAssetClass = await AssetClass.query().returning('*').insert({
+                code: assetClassCode,
+                active: true
+              });
+    
+              assetClasses.push(createAssetClass);
 
-        if (assetClassCode) {
-          const assetClass = assetClasses.find(assetClass => assetClass.code === assetClassCode);
-
-          if (assetClass) {
-            nextValues.asset_class_id = assetClass.id;
-          } else {
-            const createAssetClass = await AssetClass.query().returning('*').insert({
-              code: assetClassCode,
-              active: true
-            });
-  
-            nextValues.asset_class_id = createAssetClass.id;
-            assetClasses.push(createAssetClass);
+              return createAssetClass.id;
+             
+            }
           }
-        }
+        },
+        {
+          key: 'locale_id',
+          source: 'locale',
+          target: 'locale.code',
+          transform: async (localeCode) => {
+            const locale = locales.find(locale => locale.code === localeCode);
+            if (locale) {
+              return locale.id;
+            } else {
+              const createLocale = await Locale.query().returning('*').insert({
+                code: localeCode,
+                active: true
+              });
+    
+              locales.push(createLocale);
 
-        if (localeCode) {
-          const locale = locales.find(locale => locale.code === localeCode);
-          if (locale) {
-            nextValues.locale_id = locale.id;
-          } else {
-            const createLocale = await Locale.query().returning('*').insert({
-              code: localeCode,
-              active: true
-            });
-  
-            nextValues.locale_id = createLocale.id;
-            locales.push(createLocale);
+              return createLocale.id;
+            }
           }
+        },
+        {
+          key: 'description'
         }
-
-        return nextValues;
-      });
-
-
-      const {create, update} = await syncronizer.result({
-        asset_class: 'assetClass.code',
-        locale: 'locale.code',
-        description: 'description',
-      });
-
-
-
+      ]);
 
       return {create, update};
 

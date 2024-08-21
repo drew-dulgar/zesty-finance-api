@@ -51,10 +51,10 @@ class PolygonService {
     }
   }
 
-  getTickers({ tickerType, market, active = true, sort = 'ticker', order = 'asc', limit = 1000, next_url } = {}) {
+  getTickers({ tickerType, market = 'stocks', active = true, sort = 'ticker', order = 'asc', limit = 1000, nextUrl } = {}) {
 
-    if (next_url) {
-      const url = URL.parse(next_url);
+    if (nextUrl) {
+      const url = URL.parse(nextUrl);
 
       return this.fetch('/v3/reference/tickers', {
         cursor: url.searchParams.get('cursor'),
