@@ -22,7 +22,7 @@
     "jsonwebtoken": "^9.0.2",
     "knex": "^3.1.0",
     "lodash-es": "^4.17.21",
-    "luxon": "^3.4.4",
+    "luxon": "^3.5.0",
     "node-cache": "^5.1.2",
     "node-fetch": "^3.3.2",
     "objection": "^3.1.4",
