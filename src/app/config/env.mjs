@@ -4,6 +4,7 @@ export const ENVIRONMENT = process.env.NODE_ENV || 'production';
 export const APP_PORT = process.env.APP_PORT || 3000;
 export const APP_CACHE = process.env.APP_CACHE === 'true' ? true : false;
 export const APP_LOG_LEVEL = process.env.APP_LOG_LEVEL || 'error';
+export const APP_ORIGIN_URL = process.env.APP_ORIGIN_URL || null;
 
 export const SECRET_SESSION = process.env.SECRET_SESSION;
 

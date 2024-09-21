@@ -14,7 +14,7 @@ const authenticate = (req, res, next) => {
 
       if (!account) {
         return res.status(403).json({
-          authenticated: false
+          success: false
         });
       };
 
@@ -27,17 +27,29 @@ const authenticate = (req, res, next) => {
         await AccountService.update({ lastLogin: new Date().toUTCString() }, { id: account.id }, 1);
 
         res.json({
-          account,
-          authenticated: true,
-        })
+          success: true,
+        });
       });
 
     })(req, res, next);
-  } catch(error) {
+  } catch (error) {
+    next(error);
+  }
+}
+
+const logout = (req, res, next) => {
+  try {
+    req.session.destroy();
+    req.logout(() => {});
+    res.clearCookie('connect.sid');
+
+    res.json({ success: true });
+  } catch (error) {
     next(error);
   }
 }
 
 export default {
   authenticate,
+  logout
 }

@@ -16,7 +16,13 @@
   "license": "ISC",
   "dependencies": {
     "@dotenvx/dotenvx": "^1.6.4",
+    "@mantine/core": "^7.12.1",
+    "@mantine/dates": "^7.12.1",
+    "@mantine/hooks": "^7.12.1",
+    "@mantine/modals": "^7.12.1",
+    "connect-session-knex": "^5.0.0",
     "cors": "^2.8.5",
+    "dayjs": "^1.11.13",
     "express": "^4.19.2",
     "express-session": "^1.18.0",
     "jsonwebtoken": "^9.0.2",
@@ -37,6 +43,7 @@
     "chai": "^5.1.1",
     "eslint": "^9.8.0",
     "globals": "^15.9.0",
+    "knex-migrate": "^1.7.4",
     "mocha": "^10.7.0",
     "nodemon": "^3.1.4"
   }

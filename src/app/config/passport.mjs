@@ -10,7 +10,7 @@ const initializePassport = () => {
   },
     (email, password, cb) => AccountService.authenticate(email, password)
       .then((account) => {
-        
+
         if (account) {
           return cb(null, account, { message: 'Logged In Successfully' });
         }
@@ -21,14 +21,18 @@ const initializePassport = () => {
   ));
 
   passport.serializeUser((account, cb) => {
-    process.nextTick(() =>  cb(null, {
-        id: account.id,
-        roles: account.accountRoles,
+    const { id, accountRoles } = account;
+
+    process.nextTick(() => cb(null, {
+      account: {
+        id,
+        accountRoles,
+      }
     }));
   });
-  
+
   passport.deserializeUser((account, cb) => {
-    process.nextTick(()=> cb(null, account));
+    process.nextTick(() => cb(null, account));
   });
 };
 

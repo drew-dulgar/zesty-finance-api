@@ -1,41 +1,60 @@
 
 import express from 'express';
 import session from 'express-session';
+import { ConnectSessionKnexStore } from 'connect-session-knex';
 import cors from 'cors';
+import {initializeRoutes, initializeAuthorizedRoutes} from '../routes.mjs';
 import passport from './passport.mjs';
-import routes from '../routes.mjs';
-import { ENVIRONMENT, SECRET_SESSION } from './env.mjs';
 import logger from './logger.mjs';
+import { ENVIRONMENT, APP_ORIGIN_URL, SECRET_SESSION } from './env.mjs';
+import { clients } from './db.mjs';
+import authorizeMiddleware from '../middleware/authorize.mjs';
+import loggerMiddleware from '../middleware/logger.mjs';
 
+const isProduction = ENVIRONMENT === 'production';
 let app;
 
 const initializeApp = () => {
   app = express();
 
   app.use(cors({
-    origin: ENVIRONMENT === 'production' ? 'produrl' : 'http://localhost:5173',
-    methods: ['POST', 'PUT', 'PATCH', 'GET', 'OPTIONS', 'HEAD'],
+    origin: APP_ORIGIN_URL,
+    methods: ['POST', 'PUT', 'PATCH', 'GET', 'DELETE', 'OPTIONS', 'HEAD'],
     credentials: true,
   }));
 
   app.use(express.json());
 
+  app.use(loggerMiddleware);
+
+  app.use(initializeRoutes());
+
+  // Session handling
+  const sessionStore = new ConnectSessionKnexStore({
+    knex: clients.zestyDb,
+    tableName: 'sessions'
+  });
+
   app.use(session({
+    store: sessionStore,
     secret: SECRET_SESSION,
     resave: false,
     saveUninitialized: false,
     cookie: {
       path: '/',
       httpOnly: true,
-      secure: ENVIRONMENT === 'production',
-      sameSite: ENVIRONMENT === 'production' ? 'strict' : false,
-      //maxAge: '',
-    }
+      secure: isProduction,
+      sameSite: isProduction ? 'strict' : false,
+      maxAge: 1 * 60 * 60 * 1000, // 1 hour
+    },
+    rolling: true
   }));
 
   app.use(passport.session());
 
-  app.use(routes);
+  app.use(authorizeMiddleware);
+
+  app.use(initializeAuthorizedRoutes())
 
   app.use((req, res) => {
     res.status(404).json({

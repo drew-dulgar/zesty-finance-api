@@ -1,6 +1,10 @@
 import knex from 'knex';
-import logger from './logger.mjs';
 import pg from 'pg';
+import path from 'path';
+import logger from './logger.mjs';
+import {
+  DB_CONNECTIONS
+} from './env.mjs';
 
 // override next date handling
 const { types } = pg;
@@ -13,12 +17,6 @@ types.setTypeParser(types.builtins.TIMESTAMPTZ, timezoneParser);
 types.setTypeParser(types.builtins.TIMESTAMP, timezoneParser);
 
 types.setTypeParser(types.builtins.NUMERIC, numericParser);
-
-
-// Zesty Db connection
-import {
-  DB_CONNECTIONS
-} from './env.mjs';
 
 const { ZESTY_DB } = DB_CONNECTIONS;
 

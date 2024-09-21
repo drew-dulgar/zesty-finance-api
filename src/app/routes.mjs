@@ -1,15 +1,28 @@
 import { Router } from 'express';
-import { NPM_PACKAGE_VERSION } from './config/env.mjs';
-import routes from './controllers/routes.mjs';
 
-const router = Router();
+import routes from './controllers/index.mjs';
+import AppController from './controllers/AppController.mjs';
 
-router.use(routes);
+const initializeRoutes = () => {
+  // these are routes that should not run through session or authorization middleware
+  const router = Router();
 
-routes.get('/health', (request, response, next) => {
-  response.status(200).json({
-    version: NPM_PACKAGE_VERSION,
-  });
-})
+  router.get('/health', AppController.health);
+  router.get('/favicon.ico', AppController.favicon);
 
-export default router;
+  return router;
+};
+
+const initializeAuthorizedRoutes = () => {
+  const router = Router();
+
+  router.use(routes);
+
+  return router;
+};
+
+
+export {
+  initializeRoutes,
+  initializeAuthorizedRoutes
+};
