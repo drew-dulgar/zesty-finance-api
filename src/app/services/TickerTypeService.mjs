@@ -1,4 +1,3 @@
-import { DateTime } from 'luxon';
 import Syncronizer from '../../utils/syncronizer.mjs';
 import { AssetClass, Locale, TickerType } from '../models/index.mjs';
 import PolygonService from './external/PolygonService.mjs'

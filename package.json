@@ -15,7 +15,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "connect-session-knex": "^5.0.0
+    "@dotenvx/dotenvx": "^1.6.4",
+    "connect-session-knex": "^5.0.0",
     "cors": "^2.8.5",
     "dayjs": "^1.11.13",
     "express": "^4.21.0",
