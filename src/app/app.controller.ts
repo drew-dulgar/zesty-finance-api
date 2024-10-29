@@ -1,4 +1,4 @@
-import { IRequest, IResponse, INextFunction } from '../express/index.js';
+import type { IRequest, IResponse, INextFunction } from '../express/index.js';
 import { NPM_PACKAGE_VERSION } from '../config/env.js';
 import { zestyFinanceDb } from '../db/index.js'
 import { sql } from 'kysely';

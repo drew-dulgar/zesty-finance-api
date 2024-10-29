@@ -1,10 +1,11 @@
-import { IRequest, IResponse, INextFunction } from "../../express/index.js";
+import type { IRequest, IResponse, INextFunction } from "../../express/index.js";
+import AccountService from './account.service.js';
 
-const get = (req: IRequest, res: IResponse, next: INextFunction): void => {
+const get = async (req: IRequest, res: IResponse, next: INextFunction): Promise<void> => {
   try {
-    res.send({
-      foo: 'bar'
-    })
+    const accounts = await AccountService.get(4);
+
+    res.send(accounts);
   } catch (error) {
     next(error);
   }

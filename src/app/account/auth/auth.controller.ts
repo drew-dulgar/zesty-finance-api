@@ -1,4 +1,4 @@
-import { IRequest, IResponse, INextFunction } from "../../../express/index.js";
+import type { IRequest, IResponse, INextFunction } from "../../../express/index.js";
 
 const authenticate = (req: IRequest, res: IResponse, next: INextFunction): void => {
   try {

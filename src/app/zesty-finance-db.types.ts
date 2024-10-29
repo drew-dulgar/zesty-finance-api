@@ -8,5 +8,5 @@ export {
 };
 
 export interface ZestyFinanceDB {
-  account: AccountTable;
+  accounts: AccountTable;
 }
