@@ -1,13 +1,13 @@
 
-import { AccountPlan } from '../models/index.mjs';
-import BaseService from './BaseService.mjs';
+import { AccountPlan } from '../models/index';
+import BaseService from './BaseService';
 
 class AccountPlanService extends BaseService {
   get({
     id,
     isActive,
     isDeleted = false,
-    isDefault,
+    isDefault
   } = {}) {
     const query = AccountPlan.query();
 

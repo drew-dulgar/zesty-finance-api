@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import syncronize from '../../utils/syncronizer.mjs';
+import syncronize from '../../utils/syncronizer';
 
 describe('utility > syncronize', () => {
   it('should run without any params', () => {

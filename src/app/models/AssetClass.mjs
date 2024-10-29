@@ -1,5 +1,5 @@
 import { Model } from 'objection';
-import { TickerType } from './index.mjs';
+import { TickerType } from './index';
 
 class AssetClass extends Model {
   static tableName = 'asset_classes';
@@ -12,7 +12,7 @@ class AssetClass extends Model {
         from: `${AssetClass.tableName}.id`,
         to: `${TickerType.tableName}.asset_class_id`
       }
-    },
+    }
   });
 
 

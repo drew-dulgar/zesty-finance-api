@@ -1,6 +1,6 @@
 import path from 'path';
 import fetch from 'node-fetch';
-import { POLYGON_URL, POLYGON_API_KEY } from '../../config/env.mjs';
+import { POLYGON_URL, POLYGON_API_KEY } from '../../config/env.js';
 
 class PolygonService {
   url;
@@ -57,7 +57,7 @@ class PolygonService {
       const url = URL.parse(nextUrl);
 
       return this.fetch('/v3/reference/tickers', {
-        cursor: url.searchParams.get('cursor'),
+        cursor: url.searchParams.get('cursor')
       });
 
     }
@@ -79,7 +79,7 @@ class PolygonService {
   getTickerTypes(assetClass = 'stocks', local = 'us') {
     return this.fetch('v3/reference/tickers/types', {
       asset_class: assetClass,
-      local,
+      local
     });
   }
 

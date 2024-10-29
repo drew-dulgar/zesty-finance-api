@@ -1,5 +1,5 @@
 import { Model } from 'objection';
-import {TickerType} from './index.mjs';
+import {TickerType} from './index';
 
 class Locale extends Model {
   static tableName = 'locales';
@@ -12,7 +12,7 @@ class Locale extends Model {
         from: `${Locale.tableName}.id`,
         to: `${TickerType.tableName}.asset_class_id`
       }
-    },
+    }
   });
 
   $beforeInsert() {

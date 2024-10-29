@@ -1,5 +1,5 @@
 import { Model } from 'objection';
-import { AssetClass, Locale } from './index.mjs';
+import { AssetClass, Locale } from './index';
 
 class TickerType extends Model {
   static tableName = 'ticker_types';

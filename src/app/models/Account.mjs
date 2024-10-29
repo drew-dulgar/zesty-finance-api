@@ -1,6 +1,6 @@
 import { Model } from 'objection';
-import { AccountPlan, AccountRole, AccountsRoles } from './index.mjs';
-import { AccountPlanService } from '../services/index.mjs';
+import { AccountPlan, AccountRole, AccountsRoles } from './index';
+import { AccountPlanService } from '../services/index';
 
 class Account extends Model {
   static tableName = 'accounts';
@@ -25,7 +25,7 @@ class Account extends Model {
         from: `${Account.tableName}.account_plan_id`,
         to: `${AccountPlan.tableName}.id`
       }
-    },
+    }
   });
 
   cleanData() {
@@ -58,7 +58,7 @@ class Account extends Model {
     if (!this.account_plan_id) {
       const defaultAccountPlan = await AccountPlanService.get({
         isActive: true,
-        isDefault: true,
+        isDefault: true
       })
         .limit(1)
         .first();

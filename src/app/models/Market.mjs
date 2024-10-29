@@ -1,5 +1,5 @@
 import { Model } from 'objection';
-import { Ticker } from './index.mjs';
+import { Ticker } from './index';
 
 class Market extends Model {
   static tableName = 'markets';
@@ -12,7 +12,7 @@ class Market extends Model {
         from: `${Market.tableName}.id`,
         to: `${Ticker.tableName}.market_id`
       }
-    },
+    }
   });
 
   $beforeInsert() {

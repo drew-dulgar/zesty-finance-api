@@ -1,8 +1,8 @@
 import { padStart } from 'lodash-es';
-import BaseService from './BaseService.mjs';
-import Syncronizer from '../../utils/syncronizer.mjs';
-import { Ticker, Locale, Market, TickerType } from '../models/index.mjs';
-import PolygonService from './external/PolygonService.mjs';
+import BaseService from './BaseService';
+import Syncronizer from '../../utils/syncronizer';
+import { Ticker, Locale, Market, TickerType } from '../models/index';
+import PolygonService from './external/PolygonService';
 
 class TickerService extends BaseService {
   cache;
@@ -17,14 +17,14 @@ class TickerService extends BaseService {
 
   get({
     id,
-    ticker,
+    ticker
   } = {}) {
 
     const query = Ticker.query()
       .withGraphJoined({
         locale: true,
         market: true,
-        type: true,
+        type: true
       }, { joinOperation: 'innerJoin' });
 
     if (typeof id !== 'undefined') {
@@ -143,31 +143,31 @@ class TickerService extends BaseService {
           const tickerType = tickerTypes.find(tickerType => tickerType.code === tickerTypeCode);
 
           return tickerType?.id || 0;
-        },
+        }
       },
       {
-        key: 'ticker',
+        key: 'ticker'
       },
       {
-        key: 'name',
+        key: 'name'
       },
       {
         key: 'cik',
         transform: (cik) => cik ? parseInt(cik) : 0
       },
       {
-        key: 'currency_name',
+        key: 'currency_name'
       },
       {
-        key: 'primary_exchange',
+        key: 'primary_exchange'
       },
       {
-        key: 'delisted',
+        key: 'delisted'
       },
       {
         key: 'last_updated',
         source: 'last_updated_utc',
-        transform: (date) => new Date(date).toUTCString(),
+        transform: (date) => new Date(date).toUTCString()
       }
     ]);
 
@@ -189,7 +189,7 @@ class TickerService extends BaseService {
         errors.push({
           keys,
           values,
-          error,
+          error
         });
       }
     });

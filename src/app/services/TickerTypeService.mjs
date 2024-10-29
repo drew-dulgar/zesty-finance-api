@@ -1,8 +1,8 @@
-import Syncronizer from '../../utils/syncronizer.mjs';
-import { AssetClass, Locale, TickerType } from '../models/index.mjs';
-import PolygonService from './external/PolygonService.mjs'
-import CacheService from './CacheService.mjs';
-import BaseService from './BaseService.mjs';
+import Syncronizer from '../../utils/syncronizer';
+import { AssetClass, Locale, TickerType } from '../models/index';
+import PolygonService from './external/PolygonService'
+import CacheService from './CacheService';
+import BaseService from './BaseService';
 
 
 class TickerTypeService extends BaseService {
@@ -28,7 +28,7 @@ class TickerTypeService extends BaseService {
     const query = TickerType.query()
       .withGraphJoined({
         assetClass: true,
-        locale: true,
+        locale: true
       }, { joinOperation: 'innerJoin' });
 
 

@@ -1,8 +1,8 @@
 
 import crypto from 'crypto';
-import { Account } from '../models/index.mjs';
-import { AccountPlanService } from '../services/index.mjs';
-import BaseService from './BaseService.mjs';
+import { Account } from '../models/index';
+import { AccountPlanService } from '../services/index';
+import BaseService from './BaseService';
 
 
 const cryptoHash_pbkdf2 = (password, salt) => new Promise((resolve, reject) => {

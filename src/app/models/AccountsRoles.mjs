@@ -1,5 +1,5 @@
 import { Model } from 'objection';
-import { Account, AccountRole } from './index.mjs';
+import { Account, AccountRole } from './index';
 
 class AccountsRoles extends Model {
   static tableName = 'accounts_roles';
@@ -20,7 +20,7 @@ class AccountsRoles extends Model {
         from: `${AccountsRoles}.account_role_id`,
         to: `${AccountRole.tableName}.id`
       }
-    },
+    }
   });
 }
 
