@@ -5,15 +5,17 @@ import { ZESTY_FINANCE_DB, IS_DEVELOPMENT } from '../config/env.js';
 import { ZestyFinanceDB } from '../app/zesty-finance-db.types.js';
 import logger from '../config/logger.js';
 
-const dialect = new PostgresDialect({
-  pool: new pg.Pool({
-    host: ZESTY_FINANCE_DB.HOST,
-    port: ZESTY_FINANCE_DB.PORT,
-    database: ZESTY_FINANCE_DB.DATABASE,
-    user: ZESTY_FINANCE_DB.USER,
-    password: ZESTY_FINANCE_DB.PASSWORD,
-    max: ZESTY_FINANCE_DB.POOLS
-  })
+const zestyFinancePool = new pg.Pool({
+  host: ZESTY_FINANCE_DB.HOST,
+  port: ZESTY_FINANCE_DB.PORT,
+  database: ZESTY_FINANCE_DB.DATABASE,
+  user: ZESTY_FINANCE_DB.USER,
+  password: ZESTY_FINANCE_DB.PASSWORD,
+  max: ZESTY_FINANCE_DB.POOLS
+});
+
+const zestyFinanceDialect = new PostgresDialect({
+  pool: zestyFinancePool
 });
 
 const log = (event: any) => {
@@ -42,8 +44,9 @@ const log = (event: any) => {
 }
 
 const zestyFinanceDb = new Kysely<ZestyFinanceDB>({
-  dialect,
+  dialect: zestyFinanceDialect,
   log
 });
 
 export default zestyFinanceDb;
+export { zestyFinanceDialect, zestyFinancePool }
