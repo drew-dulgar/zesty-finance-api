@@ -1,6 +1,6 @@
 import { Router } from 'express';
-import AppController from './app.controller.js';
-import AccountRoutes from './account/account.routes.js';
+import AppController from './AppController.js';
+import AccountRoutes from './account/routes.js';
 
 const initializeRoutes = () => {
   // these are routes that should not run through session or authorization middleware

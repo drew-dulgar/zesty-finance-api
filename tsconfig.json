@@ -15,6 +15,7 @@
     "noImplicitAny": false,
     "strictNullChecks": true,
     "strictFunctionTypes": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "allowSyntheticDefaultImports": true
   }
 }

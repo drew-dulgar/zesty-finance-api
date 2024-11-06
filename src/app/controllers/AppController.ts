@@ -1,6 +1,7 @@
-import type { IRequest, IResponse, INextFunction } from '../express/index.js';
-import { NPM_PACKAGE_VERSION } from '../config/env.js';
-import { zestyFinanceDb } from '../db/index.js'
+import type { Request, Response, NextFunction } from 'express';
+
+import { NPM_PACKAGE_VERSION } from '../../config/env.js';
+import { zestyFinanceDb } from '../../db/index.js'
 import { sql } from 'kysely';
 
 type HealthResponse = {
@@ -8,7 +9,7 @@ type HealthResponse = {
   zestyFinanceDb?: boolean;
 }
 
-const health = async (req: IRequest, res: IResponse, next: INextFunction): Promise<void> => {
+const health = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   const response: HealthResponse = {};
   let error: boolean = false;
 
@@ -39,7 +40,7 @@ const health = async (req: IRequest, res: IResponse, next: INextFunction): Promi
   }
 };
 
-const favicon = async (req, res, next) => {
+const favicon = async (req: Request, res: Response) => {
   res.status(404).json({});
 };
 

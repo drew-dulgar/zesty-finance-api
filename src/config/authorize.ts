@@ -1,4 +1,4 @@
-import type { AccountSelectable } from '../app/zesty-finance-db.types.js';
+import type { AccountSelectable } from '../app/repositories/zesty-finance-db.js';
 
 enum AuthorizeActions {
   create = 'create',

@@ -1,5 +1,5 @@
 import winston from 'winston';
-import { APP_LOG_LEVEL } from './env.js';
+import { APP_LOG_LEVEL } from '../../config/env.js';
 
 const { format, transports } = winston;
 const { Console } = transports;

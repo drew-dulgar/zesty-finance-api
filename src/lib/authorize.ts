@@ -1,4 +1,4 @@
-import type { AccountSelectable } from '../app/zesty-finance-db.types.js';
+import type { AccountSelectable } from '../app/repositories/zesty-finance-db.js';
 import type { AuthorizeResponseType } from './authorize.types.js';
 
 import accessControls from '../config/authorize.js';

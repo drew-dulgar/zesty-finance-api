@@ -1,24 +1,15 @@
-
-import dotenvx from '@dotenvx/dotenvx';
-
-dotenvx.config({
-  path: path.join(import.meta.dirname, '../../../.env.local')
-});
-
 import * as path from 'path';
 import { promises as fs } from 'fs';
 import {
   Kysely,
   Migrator,
   FileMigrationProvider,
+  MigrationResultSet
 } from 'kysely';
 import { kebabCase } from 'lodash-es';
 
-
 // import after donenv
 import zestyFinanceDb from './zesty-finance-db.js';
-
-
 
 const migrationsPath = path.join(import.meta.dirname, 'migrations');
 
@@ -48,36 +39,49 @@ export const down = async (db: Kysely<any>): Promise<void> => {
 
   try {
     await fs.writeFile(migrationFilePath, migrationFileContent);
+    process.exit(0);
   } catch (err) {
     console.log(err);
+    process.exit(1);
   }
 }
 
 export const migrate = async (method: 'up' | 'down' | 'latest' = 'latest') => {
-  const migrateMethods = {
-    up: migrator.migrateUp,
-    down: migrator.migrateDown,
-    latest: migrator.migrateToLatest,
-  };
+  let migration: MigrationResultSet = {error: null, results: []};
+  let message: string = 'migrated';
 
-  if (!(method in migrateMethods)) {
-    throw new Error('Invalid migrate method passed');
+  switch(method) {
+    case 'up':
+      migration = await migrator.migrateUp();
+    break;
+    case 'down':
+      migration = await migrator.migrateDown();
+      message = 'migrated down';
+    break;
+    case 'latest':
+      migration = await migrator.migrateToLatest();
+    break;
   }
 
-  const { error, results } = await migrateMethods[method]();
+  const { error, results } = migration;
 
   if (error) {
     console.error(error);
-    process.exit(1);
   }
 
   results?.forEach((result) => {
     if (result.status === 'Success') {
-      console.log(`migration "${result.migrationName}" was executed successfully`);
+      console.log(`"${result.migrationName}" was ${message} successfully.`);
     } else if (result.status === 'Error') {
-      console.error(`failed to execute migration "${result.migrationName}"`);
+      console.error(`"${result.migrationName}" failed to ${message}.`);
     }
   });
+
+  if (error) {
+    process.exit(1);
+  } else {
+    process.exit(0);
+  }
 }
 
 const [, , method, ...args] = process.argv;

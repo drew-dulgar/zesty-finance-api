@@ -1,9 +1,9 @@
 
 import pg from 'pg';
 import { Kysely, PostgresDialect } from 'kysely';
-import { ZESTY_FINANCE_DB, IS_DEVELOPMENT } from '../config/env.js';
-import { ZestyFinanceDB } from '../app/zesty-finance-db.types.js';
-import logger from '../config/logger.js';
+import { IS_DEVELOPMENT, ZESTY_FINANCE_DB } from '../config/env.js';
+import { ZestyFinanceDB } from '../app/repositories/zesty-finance-db.js';
+import logger from '../app/lib/logger.js';
 
 const zestyFinancePool = new pg.Pool({
   host: ZESTY_FINANCE_DB.HOST,
@@ -30,12 +30,13 @@ const log = (event: any) => {
       logger.error({
         sql,
         duration,
-        error: event.error
+        error: event.error,
+        params: IS_DEVELOPMENT ? params : [],
       });
       break;
     case 'query':
       logger.info(`zestyDbQuery(${duration}):\n${event.query.sql}`);
-      if (params.length > 0) {
+      if (IS_DEVELOPMENT && params.length > 0) {
         logger.info(params);
       }
 

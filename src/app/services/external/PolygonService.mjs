@@ -1,6 +1,6 @@
 import path from 'path';
 import fetch from 'node-fetch';
-import { POLYGON_URL, POLYGON_API_KEY } from '../../config/env.js';
+import { POLYGON_URL, POLYGON_API_KEY } from '../../../config/env.js';
 
 class PolygonService {
   url;

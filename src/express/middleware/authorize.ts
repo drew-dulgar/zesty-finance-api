@@ -1,8 +1,9 @@
 
-import type { IRequest, IResponse, INextFunction } from '../index.js';
+import type { Request, Response, NextFunction } from 'express';
+
 import authorize from '../../config/authorize.js';
 
-const authorizeMiddleware = async (req: IRequest, res: IResponse, next: INextFunction): Promise<any> => {
+const authorizeMiddleware = async (req: Request, res: Response, next: NextFunction): Promise<any> => {
 
   next();
   /*
