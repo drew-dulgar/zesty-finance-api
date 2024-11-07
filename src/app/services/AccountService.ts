@@ -86,9 +86,8 @@ const authenticate = async (
 }
 
 const getWithPlanAndRoles = async (
-  accountId: number,
-  isDeleted: boolean = false
-): Promise<Account> => {
+  accountId: number
+): Promise<Account | undefined> => {
   const account = await AccountRepository.get({
     includes: {
       plan: true,
@@ -96,12 +95,14 @@ const getWithPlanAndRoles = async (
     },
     where: {
       id: accountId,
-      isDeleted,
+      isDeleted: false,
     },
     limit: 1,
-  }).executeTakeFirstOrThrow();
+  }).executeTakeFirst();
 
-  return selectableToCamel<AccountSelectable, Account>(account);
+  if (account) {
+    return selectableToCamel<AccountSelectable, Account>(account);
+  }
 }
 
 const getEmailExists = async (

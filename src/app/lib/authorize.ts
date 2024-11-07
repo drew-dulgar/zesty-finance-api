@@ -1,7 +1,16 @@
-import type { AccountSelectable } from '../app/repositories/zesty-finance-db.js';
-import type { AuthorizeResponseType } from './authorize.types.js';
+import type { Request } from 'express';
 
-import accessControls from '../config/authorize.js';
+import accessControls from '../../config/accessControls.js';
+
+export type AuthorizedResponseType = {
+  roles: string[];
+  routes: {
+    [key: string]: string[];
+  }
+  actions: {
+    [key: string]: string[];
+  }
+};
 
 const validRoutes = {};
 
@@ -23,10 +32,8 @@ for (const role in accessControls) {
   }
 }
 
-
-const authorize = (account: AccountSelectable): AuthorizeResponseType => {
-  const authorized: AuthorizeResponseType = {
-    authenticated: false,
+const authorize = (req: Request): AuthorizedResponseType => {
+  const authorized: AuthorizedResponseType = {
     roles: [],
     routes: {},
     actions: {}
@@ -35,7 +42,7 @@ const authorize = (account: AccountSelectable): AuthorizeResponseType => {
   for (const role in accessControls) {
     const accessControl = accessControls[role];
 
-    if (accessControl.selector(account)) {
+    if (accessControl.selector(req)) {
       authorized.roles.push(role);
 
       for (const resource in accessControl.grants) {
@@ -65,8 +72,6 @@ const authorize = (account: AccountSelectable): AuthorizeResponseType => {
       }
     }
   }
-
-  authorized.authenticated = authorized.roles.includes('authenticated');
 
   return authorized;
 };

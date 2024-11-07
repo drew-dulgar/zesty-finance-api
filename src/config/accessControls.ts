@@ -1,23 +1,14 @@
-import type { AccountSelectable } from '../app/repositories/zesty-finance-db.js';
+import type { Request } from 'express';
 
-enum AuthorizeActions {
-  create = 'create',
-  read = 'read',
-  update = 'update',
-  delete = 'delete'
-};
+type AuthorizeActions = 'create' | 'read' | 'update' | 'delete' | string;
+type AuthorizeMethods = 'POST' | 'GET' | 'PUT' | 'PATCH' | 'DESTROY';
 
-enum AuthorizeMethods {
-  POST = 'POST',
-  GET = 'GET',
-  PUT = 'PUT',
-  PATCH = 'PATCH',
-  DESTROY = 'DESTROY'
-};
+type AuthorizeAccessControlGrantActions = '*' | AuthorizeActions | AuthorizeActions[];
+type AuthorizeAccessControlGrantMethods = '*' | AuthorizeMethods | AuthorizeMethods[];
 
 type AuthorizeAccessControls = {
   [key: '*' | string]: {
-    selector: (params: AccountSelectable) => boolean;
+    selector: (params: Request) => boolean;
     grants: {
       [key: string]: {
         actions?: AuthorizeAccessControlGrantActions;
@@ -27,9 +18,6 @@ type AuthorizeAccessControls = {
     }
   }
 }
-
-type AuthorizeAccessControlGrantActions = '*' | keyof typeof AuthorizeActions | Array<keyof typeof AuthorizeActions>;
-type AuthorizeAccessControlGrantMethods = '*' | keyof typeof AuthorizeMethods | Array<keyof typeof AuthorizeMethods>;
 
 type Aliases = {
   [key: string]: {
@@ -68,29 +56,31 @@ const accessControls: AuthorizeAccessControls = {
     }
   },
   'not-authenticated': {
-    selector: ({ id }) => !id,
+    selector: ({ authenticated }) => !authenticated,
     grants: {
-      login: {
+      auth: {
         route: '/account/auth',
-        methods: 'POST'
+        methods: 'POST',
+        actions: 'authenticate'
       },
-      register: {
-        route: '/account/register',
-        methods: 'POST'
+      account: {
+        route: '/account',
+        methods: 'POST',
+        actions: ['create', 'recover-password'],
       }
     }
   },
   authenticated: {
-    selector: ({ id }) => Boolean(id),
+    selector: ({ authenticated }) => authenticated,
     grants: {
       logout: {
         route: '/account/auth',
         methods: 'DESTROY'
       },
       account: {
-        actions: aliases.manage.actions || [],
         route: '/account',
-        methods: aliases.manage.methods || []
+        actions: ['update', 'delete'],
+        methods: ['PUT', 'PATCH', 'DESTROY']
       }
     }
   },
@@ -106,8 +96,6 @@ const accessControls: AuthorizeAccessControls = {
     }
   }
 };
-
-
 
 export default accessControls;
 

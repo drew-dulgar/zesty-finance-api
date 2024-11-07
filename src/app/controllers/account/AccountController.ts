@@ -6,7 +6,7 @@ const get = async (req: Request, res: Response, next: NextFunction): Promise<voi
   try {
     res.send({
       authenticated: req.authenticated,
-      authorized: req.authorized,
+      authorized: req.authorized.actions || {},
       account: req.account
     });
   } catch (error) {

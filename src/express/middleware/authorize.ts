@@ -1,48 +1,36 @@
 
 import type { Request, Response, NextFunction } from 'express';
 
-import authorize from '../../config/authorize.js';
+import authorize, { validRoutes } from '../../app/lib/authorize.js';
+import error404Middleware from '../middleware/error404.js';
 
 const authorizeMiddleware = async (req: Request, res: Response, next: NextFunction): Promise<any> => {
-
-  next();
-  /*
-  const { user, originalUrl, method } = req;
-  const authorized = authorize(user?.account);
-
-  if (!req?.user) {
-    req.user = {};
-  }
-
-  req.authenticated = authorized.authenticated;
-  req.authorized = {
-    routes: authorized.routes,
-    actions: authorized.actions
-  };
+  const { originalUrl, method } = req;
+  req.authorized = authorize(req);
 
   const route = typeof req.authorized.routes['*'] === 'undefined' ? originalUrl : '*';
   const methods = req.authorized.routes?.[route] || [];
 
-  // has access
-  if (
-    // user is authenticated
-    (req.authorized.routes[route] && (methods.includes('*') || methods.includes(method))
-    // route doesn't actually exist so we want to send 'em on to the 404 handler
-    || (typeof validRoutes?.[route] === 'undefined' || !validRoutes[route].includes(method))
-  )) {
+  // user is authenticated, send 'em on through
+  if (req.authorized.routes[route] && (methods.includes('*') || methods.includes(method))) {
     return next();
   }
 
-  if (req.user.authenticated) {
+  // 404 handler
+  if (typeof validRoutes?.[route] === 'undefined' || !validRoutes[route].includes(method)) {
+    return error404Middleware(req, res, next);
+  }
+
+  if (req.authenticated) {
     return res.status(403).json({
+      authenticated: req.authenticated,
       authorized: false
     });
   }
 
   return res.status(401).json({
-    authenticated: false,
+    authenticated: req.authenticated,
   });
-  */
 };
 
 export default authorizeMiddleware;

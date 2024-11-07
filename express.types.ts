@@ -1,4 +1,5 @@
 import type { Account } from './src/app/services/AccountService.js';
+import type  { AuthorizedResponseType } from './src/app/lib/authorize.js';
 
 declare module 'express-session' {
   interface SessionData {
@@ -11,9 +12,7 @@ declare global {
     interface Request {
       account: Account | null;
       authenticated: boolean;
-      authorized: {
-        routes: string[];
-      };
+      authorized: AuthorizedResponseType;
     }
   }
 }
