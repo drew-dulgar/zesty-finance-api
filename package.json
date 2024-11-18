@@ -21,7 +21,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@dotenvx/dotenvx": "^1.21.1",
+    "@dotenvx/dotenvx": "^1.24.0",
     "connect-pg-simple": "^10.0.0",
     "cors": "^2.8.5",
     "dayjs": "^1.11.13",
