@@ -29,7 +29,7 @@
     "express-session": "^1.18.1",
     "joi": "^17.13.3",
     "kysely": "^0.27.5",
-    "lodash-es": "^4.17.21",
+    "lodash-es": "^4.17.23",
     "node-cache": "^5.1.2",
     "node-fetch": "^3.3.2",
     "pg": "^8.13.3",
