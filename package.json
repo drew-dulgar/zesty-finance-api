@@ -27,7 +27,7 @@
     "dayjs": "^1.11.19",
     "express": "^4.22.1",
     "express-session": "^1.19.0",
-    "joi": "^17.13.3",
+    "joi": "^18.0.2",
     "kysely": "^0.28.11",
     "lodash-es": "^4.17.23",
     "node-cache": "^5.1.2",
