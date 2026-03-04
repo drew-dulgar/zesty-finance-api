@@ -59,9 +59,9 @@ const accessControls: AuthorizeAccessControls = {
     selector: ({ authenticated }) => !authenticated,
     grants: {
       auth: {
-        route: '/account/auth',
+        route: '/session',
         methods: 'POST',
-        actions: 'authenticate'
+        actions: 'login'
       },
       account: {
         route: '/account',
@@ -74,7 +74,7 @@ const accessControls: AuthorizeAccessControls = {
     selector: ({ authenticated }) => authenticated,
     grants: {
       logout: {
-        route: '/account/auth',
+        route: '/session',
         methods: 'DESTROY'
       },
       account: {

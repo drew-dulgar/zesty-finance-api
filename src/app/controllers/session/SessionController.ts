@@ -1,6 +1,6 @@
 import type { Request, Response, NextFunction } from 'express';
 
-const authenticate = (req: Request, res: Response, next: NextFunction): void => {
+const login = (req: Request, res: Response, next: NextFunction): void => {
   try {
 
   } catch (error) {
@@ -21,6 +21,6 @@ const logout = (req: Request, res: Response, next: NextFunction): void => {
 }
 
 export default {
-  authenticate,
+  login,
   logout
 }

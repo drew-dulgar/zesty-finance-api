@@ -8,7 +8,7 @@ import { camelToSelectable } from '../utils/objects.js';
 
 const get = (
   {
-    select = ['id', 'username', 'email', 'email_verified', 'first_name', 'middle_name', 'last_name', 'is_deleted'],
+    select = ['id', 'username', 'email', 'first_name', 'middle_name', 'last_name', 'is_deleted'],
     where = {},
     includes = {
       plan: false,
@@ -61,10 +61,6 @@ const get = (
 
   if (typeof where.email !== 'undefined') {
     query = query.where('email', '=', where.email);
-  }
-
-  if (typeof where.emailVerified !== 'undefined') {
-    query = query.where('email_verified', '=', where.emailVerified);
   }
 
   if (typeof where.isDeleted !== 'undefined') {
@@ -163,10 +159,9 @@ const updateEmailByAccountId = async (
     .updateTable('accounts')
     .set({
       email,
-      email_verified: emailVerified,
     })
     .where('id', '=', accountId)
-    .returning(['id', 'email', 'email_verified']);
+    .returning(['id', 'email']);
 
   const response = await query.executeTakeFirstOrThrow();
 

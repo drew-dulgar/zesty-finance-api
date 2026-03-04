@@ -7,7 +7,6 @@ export const up = async (db: Kysely<any>): Promise<void> => {
     .addColumn('account_plan_id', 'integer', col => col.references('account_plans.id').notNull().onUpdate('cascade').onDelete('no action'))
     .addColumn('username', 'varchar(50)', col => col.unique())
     .addColumn('email', 'varchar(512)', col => col.notNull().unique())
-    .addColumn('email_verified', 'boolean', col => col.notNull().defaultTo(false))
     .addColumn('salt', 'bytea')
     .addColumn('password', 'bytea')
     .addColumn('first_name', 'varchar(255)')

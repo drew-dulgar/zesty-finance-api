@@ -17,7 +17,7 @@ const sessionMiddleware = session({
     path: '/',
     httpOnly: true,
     secure: IS_PRODUCTION,
-    sameSite: IS_PRODUCTION ? 'strict' : false,
+    sameSite: IS_PRODUCTION ? 'strict' : 'lax',
     maxAge: 1 * 60 * 60 * 1000, // 1 hour
   },
   rolling: true

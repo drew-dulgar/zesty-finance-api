@@ -3,7 +3,7 @@ export const IS_DEVELOPMENT = NODE_ENV !== 'production';
 export const IS_PRODUCTION = NODE_ENV === 'production';
 
 // Export all environment vars needed throughout the app
-export const APP_PORT = process.env.APP_PORT || 3000;
+export const APP_PORT = process.env.APP_PORT || 3001;
 export const APP_CACHE = process.env.APP_CACHE === 'true' ? true : false;
 export const APP_LOG_LEVEL = process.env.APP_LOG_LEVEL || 'error';
 export const APP_ORIGIN_URL = process.env.APP_ORIGIN_URL;

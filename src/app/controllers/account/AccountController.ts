@@ -4,6 +4,7 @@ import { AccountSchemaCreate } from '../../schemas/AccountSchema.js';
 
 const get = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
+    console.log('account data retrieved');
     res.send({
       authenticated: req.authenticated,
       authorized: req.authorized.actions || {},

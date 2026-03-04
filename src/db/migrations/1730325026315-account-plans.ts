@@ -15,6 +15,13 @@ export const up = async (db: Kysely<any>): Promise<void> => {
     .addColumn('created_at', 'timestamp', col => col.notNull().defaultTo(sql`(now() at time zone 'utc')`))
     .addColumn('updated_at', 'timestamp', col => col.notNull().defaultTo(sql`(now() at time zone 'utc')`))
     .execute();
+
+    await db.insertInto('account_plans').values({
+      label: 'Free',
+      is_default: true,
+      is_active: true,
+      is_deleted: false,
+    }).execute();
 };
 
 export const down = async (db: Kysely<any>): Promise<void> => {

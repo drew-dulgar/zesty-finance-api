@@ -6,7 +6,6 @@ export interface AccountsTable {
   account_plan_id: number;
   username: string | null;
   email: string;
-  email_verified: Generated<boolean>;
   salt: Buffer | null;
   password: Buffer | null;
   first_name: string | null;
@@ -47,8 +46,24 @@ export type AccountPlanSelectable = Selectable<AccountPlansTable>;
 export type AccountPlanInsertable = Insertable<AccountPlansTable>;
 export type AccountPlanUpdateable = Updateable<AccountPlansTable>;
 
+// Account Email Verification
+export interface AccountEmailVerificationTable {
+  account_id: number | null;
+  email: string;
+  code: string;
+  verified: Generated<boolean>;
+  valid_until: Generated<Date | string>;
+  created_at: Generated<Date | string>;
+  updated_at: Generated<Date | string>;
+};
+
+export type AccountEmailVerificationSelectable = Selectable<AccountEmailVerificationTable>;
+export type AccountEmailVerificationInsertable = Insertable<AccountEmailVerificationTable>;
+export type AccountEmailVerificationUpdateable = Updateable<AccountEmailVerificationTable>;
+
 
 export interface ZestyFinanceDB {
   accounts: AccountsTable;
   account_plans: AccountPlansTable;
+  account_email_verification: AccountEmailVerificationTable;
 };
