@@ -12,7 +12,7 @@ const sessionMiddleware = session({
   }),
   secret: SECRET_SESSION,
   resave: false,
-  saveUninitialized: true,
+  saveUninitialized: false,
   cookie: {
     path: '/',
     httpOnly: true,

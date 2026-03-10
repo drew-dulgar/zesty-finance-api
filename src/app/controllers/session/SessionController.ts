@@ -2,7 +2,7 @@ import type { Request, Response, NextFunction } from 'express';
 
 const login = (req: Request, res: Response, next: NextFunction): void => {
   try {
-
+    res.json({ success: true });
   } catch (error) {
     next(error);
   }
