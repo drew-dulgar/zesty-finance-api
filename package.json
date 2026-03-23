@@ -40,7 +40,7 @@
     "@stylistic/eslint-plugin-ts": "^4.4.1",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.0",
-    "@types/node": "^22.13.4",
+    "@types/node": "^25.5.0",
     "@types/nodemailer": "^7.0.11",
     "@types/pg": "^8.16.0",
     "@types/winston": "^2.4.4",
