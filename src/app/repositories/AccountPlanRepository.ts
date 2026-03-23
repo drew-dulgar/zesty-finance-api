@@ -1,7 +1,7 @@
 
 import type { Kysely, Transaction, SelectExpression } from 'kysely';
 import { jsonArrayFrom, jsonObjectFrom } from 'kysely/helpers/postgres';
-import type { ZestyFinanceDB, AccountPlanSelectable, AccountInsertable, AccountUpdateable } from './zesty-finance-db.js';
+import type { ZestyFinanceDB, AccountPlanSelectable } from './zesty-finance-db.js';
 import type { AccountPlan } from '../services/AccountPlanService.js';
 
 import { zestyFinanceDb } from '../../db/index.js';

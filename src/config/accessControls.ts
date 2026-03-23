@@ -6,6 +6,20 @@ type AuthorizeMethods = 'POST' | 'GET' | 'PUT' | 'PATCH' | 'DESTROY';
 type AuthorizeAccessControlGrantActions = '*' | AuthorizeActions | AuthorizeActions[];
 type AuthorizeAccessControlGrantMethods = '*' | AuthorizeMethods | AuthorizeMethods[];
 
+type Aliases = {
+  [key: string]: {
+    actions?: AuthorizeAccessControlGrantActions;
+    methods?: AuthorizeAccessControlGrantMethods;
+  }
+}
+
+const aliases: Aliases = {
+  manage: {
+    actions: ['create', 'read', 'update', 'delete'],
+    methods: ['POST', 'GET', 'PUT', 'PATCH', 'DESTROY']
+  }
+};
+
 type AuthorizeAccessControls = {
   [key: '*' | string]: {
     selector: (params: Request) => boolean;
@@ -18,31 +32,6 @@ type AuthorizeAccessControls = {
     }
   }
 }
-
-type Aliases = {
-  [key: string]: {
-    actions?: AuthorizeAccessControlGrantActions;
-    methods?: AuthorizeAccessControlGrantMethods;
-  }
-}
-
-const aliases: Aliases = {
-  manage: {
-    actions: [
-      'create',
-      'read',
-      'update',
-      'delete'
-    ],
-    methods: [
-      'POST',
-      'GET',
-      'PUT',
-      'PATCH',
-      'DESTROY'
-    ]
-  }
-};
 
 const accessControls: AuthorizeAccessControls = {
   '*': {
@@ -59,9 +48,14 @@ const accessControls: AuthorizeAccessControls = {
     selector: ({ authenticated }) => !authenticated,
     grants: {
       auth: {
-        route: '/session',
+        route: '/auth/*',
         methods: 'POST',
         actions: 'login'
+      },
+      session: {
+        actions: ['create'],
+        route: '',
+        methods: '*'
       },
       account: {
         route: '/account',
@@ -73,10 +67,6 @@ const accessControls: AuthorizeAccessControls = {
   authenticated: {
     selector: ({ authenticated }) => authenticated,
     grants: {
-      logout: {
-        route: '/session',
-        methods: 'DESTROY'
-      },
       account: {
         route: '/account',
         actions: ['update', 'delete'],
@@ -85,8 +75,7 @@ const accessControls: AuthorizeAccessControls = {
     }
   },
   admin: {
-    //selector: ({ accountRoles }) => (accountRoles || []).includes('admin'),
-    selector: () => false,
+    selector: ({ account }) => (account?.roles || []).some(r => r.label === 'admin'),
     grants: {
       '*': {
         actions: '*',

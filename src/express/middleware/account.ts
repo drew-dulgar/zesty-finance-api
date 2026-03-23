@@ -1,21 +1,20 @@
-
 import type { Request, Response, NextFunction } from 'express';
 
-import AccountService from '../../app/services/AccountService.js';
+import { fromNodeHeaders } from 'better-auth/node';
+import { auth } from '../../config/auth.js';
+import { AccountsRolesRepository } from '../../app/repositories/index.js';
 
 const accountMiddleware = async (req: Request, res: Response, next: NextFunction): Promise<any> => {
 
   req.authenticated = false;
   req.account = null;
 
-  if (req?.session?.account?.id) {
+  const session = await auth.api.getSession({ headers: fromNodeHeaders(req.headers) });
+
+  if (session?.user) {
     req.authenticated = true;
-
-    const account = await AccountService.getWithPlanAndRoles(req.session.account.id);
-
-    if (account) {
-      req.account = account;
-    }
+    const roles = await AccountsRolesRepository.getByAccountId(session.user.id);
+    req.account = { ...session.user, roles };
   }
 
   next();

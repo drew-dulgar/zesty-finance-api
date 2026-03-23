@@ -5,4 +5,4 @@ export { default as error404Middleware } from './error404.js';
 export { default as inputValidationMiddleware } from './inputValidation.js';
 export { default as errorHandlerMiddleware } from './errorHandler.js';
 export { default as loggerMiddleware } from './logger.js';
-export { default as sessionMiddleware } from './session.js';
+export { default as requestContextMiddleware } from './requestContext.js';
