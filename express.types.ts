@@ -1,9 +1,5 @@
 import type { AuthorizedResponseType } from './src/app/lib/authorize.js';
-
-export type AccountRole = {
-  id: string;
-  label: string;
-};
+import type { AccountRole } from 'zesty-finance-shared';
 
 export type BetterAuthUser = {
   id: string;

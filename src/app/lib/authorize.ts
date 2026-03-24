@@ -1,6 +1,7 @@
 import type { Request } from 'express';
 
 import accessControls from '../../config/accessControls.js';
+import type { Grant } from '../../config/accessControls.js';
 
 export type AuthorizedResponseType = {
   roles: string[];
@@ -12,22 +13,27 @@ export type AuthorizedResponseType = {
   }
 };
 
-const validRoutes = {};
+const toArray = <T>(val: T | T[]): T[] => Array.isArray(val) ? val : [val];
+const splitOrArray = (val: string | string[]): string[] => Array.isArray(val) ? val : val.split(',');
+
+const toGrants = (val: Grant | Grant[]): Grant[] => toArray(val);
+
+const validRoutes: { [route: string]: string[] } = {};
 
 for (const role in accessControls) {
-  const accessControl = accessControls[role];
+  const { grants } = accessControls[role];
 
-  for (const resource in accessControl.grants) {
-    const grant = accessControl.grants[resource];
+  for (const resource in grants) {
+    for (const grant of toGrants(grants[resource])) {
+      if (!grant.route) continue;
 
-    if (!validRoutes?.[grant.route]) {
-      validRoutes[grant.route] = [];
-    }
+      if (!validRoutes[grant.route]) {
+        validRoutes[grant.route] = [];
+      }
 
-    if (typeof grant?.methods !== 'undefined') {
-      validRoutes[grant.route].push(
-        ...Array.isArray(grant.methods) ? grant.methods : grant.methods.split(',')
-      );
+      if (grant.methods) {
+        validRoutes[grant.route].push(...splitOrArray(grant.methods));
+      }
     }
   }
 }
@@ -46,28 +52,24 @@ const authorize = (req: Request): AuthorizedResponseType => {
       authorized.roles.push(role);
 
       for (const resource in accessControl.grants) {
-        const grant = accessControl.grants[resource];
-
-        // Actions
-        if (typeof authorized.actions?.[resource] === 'undefined') {
+        if (!authorized.actions[resource]) {
           authorized.actions[resource] = [];
         }
 
-        if (typeof grant.actions !== 'undefined') {
-          authorized.actions[resource].push(
-            ...Array.isArray(grant.actions) ? grant.actions : grant.actions.split(',')
-          )
-        }
+        for (const grant of toGrants(accessControl.grants[resource])) {
+          if (grant.actions) {
+            authorized.actions[resource].push(...splitOrArray(grant.actions));
+          }
 
-        // Routes
-        if (typeof authorized.routes?.[grant.route] === 'undefined') {
-          authorized.routes[grant.route] = [];
-        }
+          if (grant.route) {
+            if (!authorized.routes[grant.route]) {
+              authorized.routes[grant.route] = [];
+            }
 
-        if (typeof grant.methods !== 'undefined') {
-          authorized.routes[grant.route].push(
-            ...Array.isArray(grant.methods) ? grant.methods : grant.methods.split(',')
-          );
+            if (grant.methods) {
+              authorized.routes[grant.route].push(...splitOrArray(grant.methods));
+            }
+          }
         }
       }
     }

@@ -8,7 +8,6 @@ import {
   corsMiddleware,
   error404Middleware,
   errorHandlerMiddleware,
-  inputValidationMiddleware,
   accountMiddleware,
   authorizeMiddleware,
   loggerMiddleware,
@@ -35,8 +34,6 @@ const initializeApplication = () => {
   app.use(authorizeMiddleware);
 
   app.use(initializeAuthorizedRoutes());
-
-  app.use(inputValidationMiddleware);
 
   app.use(error404Middleware);
 

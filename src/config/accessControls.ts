@@ -20,15 +20,17 @@ const aliases: Aliases = {
   }
 };
 
+type Grant = {
+  actions?: AuthorizeAccessControlGrantActions;
+  route?: string;
+  methods?: AuthorizeAccessControlGrantMethods;
+};
+
 type AuthorizeAccessControls = {
   [key: '*' | string]: {
     selector: (params: Request) => boolean;
     grants: {
-      [key: string]: {
-        actions?: AuthorizeAccessControlGrantActions;
-        route: string;
-        methods: AuthorizeAccessControlGrantMethods;
-      }
+      [resource: string]: Grant | Grant[];
     }
   }
 }
@@ -49,29 +51,23 @@ const accessControls: AuthorizeAccessControls = {
     grants: {
       auth: {
         route: '/auth/*',
-        methods: 'POST',
-        actions: 'login'
       },
-      session: {
-        actions: ['create'],
-        route: '',
-        methods: '*'
-      },
-      account: {
-        route: '/account',
-        methods: 'POST',
-        actions: ['create', 'recover-password'],
-      }
     }
   },
   authenticated: {
     selector: ({ authenticated }) => authenticated,
     grants: {
-      account: {
-        route: '/account',
-        actions: ['update', 'delete'],
-        methods: ['PUT', 'PATCH', 'DESTROY']
-      }
+      account: [
+        {
+          route: '/account',
+          actions: ['update', 'delete'],
+          methods: ['PUT', 'PATCH', 'DESTROY']
+        },
+        {
+          route: '/account/username',
+          methods: ['PATCH']
+        }
+      ],
     }
   },
   admin: {
@@ -87,5 +83,4 @@ const accessControls: AuthorizeAccessControls = {
 };
 
 export default accessControls;
-
-
+export type { Grant, AuthorizeAccessControls };

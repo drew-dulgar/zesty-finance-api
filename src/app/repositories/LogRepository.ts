@@ -1,5 +1,5 @@
 import type { Kysely, Transaction, SelectExpression } from 'kysely';
-import type { ZestyFinanceDB, LogSelectable, LogInsertable } from './zesty-finance-db.js';
+import type { ZestyFinanceDB, LogSelectable, LogInsertable, LogUpdateable } from './zesty-finance-db.js';
 
 import { zestyFinanceDb } from '../../db/index.js';
 import { requestContext } from '../lib/requestContext.js';
@@ -69,7 +69,7 @@ const get = (
 const insert = (
   values: LogInsertable,
   db: Kysely<ZestyFinanceDB> | Transaction<ZestyFinanceDB> = zestyFinanceDb
-): Promise<LogSelectable> => {
+): Promise<LogSelectable | undefined> => {
   const ctx = requestContext.getStore();
   return db
     .insertInto('logs')
@@ -79,7 +79,26 @@ const insert = (
       ...values,
     })
     .returningAll()
-    .executeTakeFirstOrThrow();
+    .executeTakeFirst();
 };
 
-export default { get, insert };
+const update = (
+  id: string,
+  values: LogUpdateable,
+  db: Kysely<ZestyFinanceDB> | Transaction<ZestyFinanceDB> = zestyFinanceDb
+) => {
+  return db
+    .updateTable('logs')
+    .set(values)
+    .where('id', '=', id)
+    .execute();
+};
+
+const remove = (
+  id: string,
+  db: Kysely<ZestyFinanceDB> | Transaction<ZestyFinanceDB> = zestyFinanceDb
+) => {
+  return db.deleteFrom('logs').where('id', '=', id).execute();
+};
+
+export default { get, insert, update, remove };

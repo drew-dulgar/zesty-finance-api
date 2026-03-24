@@ -10,8 +10,8 @@
     "db:migrate:down": "npm run db:migrate -- down",
     "db:migrate:up": "npm run db:migrate -- up",
     "db:migrate:latest": "npm run db:migrate -- latest",
-    "build": "rm -rf ./dist && tsc",
-    "start:dev": "tsc-watch --onSuccess \"dotenvx run -f .env.local -- node ./dist/index.js\"",
+    "build": "npm run build --workspace=zesty-finance-shared && rm -rf ./dist && tsc",
+    "start:dev": "concurrently \"npm run dev --workspace=zesty-finance-shared\" \"tsc-watch --onSuccess 'dotenvx run -f .env.local -- node ./dist/index.js'\"",
     "start:prod": "npm run build && dotenvx run -f .env.production -- ts-node ./dist/index.mjs",
     "test": "mocha ./src/tests/**/*.spec.mjs",
     "test:watch": "npm run test --watch",
@@ -21,19 +21,20 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "zesty-finance-shared": "*",
     "@dotenvx/dotenvx": "^1.52.0",
     "better-auth": "^1.5.5",
     "cors": "^2.8.6",
     "dayjs": "^1.11.19",
     "express": "^4.22.1",
-    "joi": "^17.13.3",
     "kysely": "^0.28.14",
     "lodash-es": "^4.17.23",
     "node-cache": "^5.1.2",
     "node-fetch": "^3.3.2",
     "nodemailer": "^8.0.3",
     "pg": "^8.18.0",
-    "winston": "^3.19.0"
+    "winston": "^3.19.0",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@eslint/js": "^9.20.0",

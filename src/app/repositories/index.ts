@@ -1,4 +1,9 @@
+export { default as AccountHistoryRepository } from './AccountHistoryRepository.js';
 export { default as AccountPlanRepository } from './AccountPlanRepository.js';
+export { default as AccountProviderRepository } from './AccountProviderRepository.js';
+export { default as AccountRepository } from './AccountRepository.js';
 export { default as AccountRolesRepository } from './AccountRolesRepository.js';
+export { default as AccountVerificationRepository } from './AccountVerificationRepository.js';
 export { default as AccountsRolesRepository } from './AccountsRolesRepository.js';
 export { default as LogRepository } from './LogRepository.js';
+export { default as SessionRepository } from './SessionRepository.js';

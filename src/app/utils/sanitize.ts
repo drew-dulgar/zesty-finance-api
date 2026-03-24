@@ -1,2 +1,2 @@
-export const emptyStringToNull = (value: string | null | undefined): string | null =>
-  value === '' ? null : (value ?? null);
+export const emptyStringToNull = (value: unknown): string | null =>
+  typeof value === 'string' && value !== '' ? value : null;

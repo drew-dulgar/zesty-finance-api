@@ -1,7 +1,9 @@
 import type { Kysely, Transaction, SelectExpression } from 'kysely';
-import type { ZestyFinanceDB, AccountRoleSelectable } from './zesty-finance-db.js';
+import type { ZestyFinanceDB, AccountRoleSelectable, AccountRoleInsertable, AccountRoleUpdateable } from './zesty-finance-db.js';
 
 import { zestyFinanceDb } from '../../db/index.js';
+import { requestContext } from '../../app/lib/requestContext.js';
+import LogRepository from './LogRepository.js';
 
 type AccountRoleWhere = {
   id?: string;
@@ -9,6 +11,20 @@ type AccountRoleWhere = {
   isDefault?: boolean;
   isActive?: boolean;
   isDeleted?: boolean;
+};
+
+const defaultLogValues = () => ({
+  resource: 'account_role',
+  actor_id: requestContext.getStore()?.actorId ?? null,
+});
+
+export const logs = {
+  create: (id: string, {...rest} = {}) =>
+    LogRepository.insert({ ...defaultLogValues(), action: 'create', resource_id: id, account_id: null, ...rest }),
+  update: (id: string, {...rest} = {}) =>
+    LogRepository.insert({ ...defaultLogValues(), action: 'update', resource_id: id, account_id: null, ...rest }),
+  remove: (id: string, {...rest} = {}) =>
+    LogRepository.insert({ ...defaultLogValues(), action: 'delete', resource_id: id, account_id: null, ...rest }),
 };
 
 const get = (
@@ -25,9 +41,7 @@ const get = (
   },
   db: Kysely<ZestyFinanceDB> | Transaction<ZestyFinanceDB> = zestyFinanceDb
 ) => {
-  let query = db
-    .selectFrom('account_roles')
-    .select(select);
+  let query = db.selectFrom('account_roles').select(select);
 
   if (typeof where.id !== 'undefined') {
     query = query.where('id', '=', where.id);
@@ -60,4 +74,35 @@ const get = (
   return query;
 };
 
-export default { get };
+const insert = async (
+  values: AccountRoleInsertable,
+  db: Kysely<ZestyFinanceDB> | Transaction<ZestyFinanceDB> = zestyFinanceDb
+): Promise<AccountRoleSelectable> => {
+  const result = await db.insertInto('account_roles').values(values).returningAll().executeTakeFirstOrThrow();
+  await logs.create(result.id);
+  return result;
+};
+
+const update = async (
+  id: string,
+  values: AccountRoleUpdateable,
+  db: Kysely<ZestyFinanceDB> | Transaction<ZestyFinanceDB> = zestyFinanceDb
+) => {
+  const result = await db.updateTable('account_roles').set(values).where('id', '=', id).execute();
+  await logs.update(id);
+  return result;
+};
+
+const remove = async (
+  id: string,
+  softDelete = true,
+  db: Kysely<ZestyFinanceDB> | Transaction<ZestyFinanceDB> = zestyFinanceDb
+) => {
+  const result = softDelete
+    ? await db.updateTable('account_roles').set({ is_deleted: true }).where('id', '=', id).execute()
+    : await db.deleteFrom('account_roles').where('id', '=', id).execute();
+  await logs.remove(id);
+  return result;
+};
+
+export default { get, insert, update, remove, logs };

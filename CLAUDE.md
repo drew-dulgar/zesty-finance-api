@@ -10,8 +10,8 @@ Express.js REST API for the Zesty Finance application. Provides account manageme
 
 ## Key Commands
 ```bash
-npm run start:dev       # Dev server with hot reload (tsc-watch + dotenvx)
-npm run build           # Compile TypeScript to dist/
+npm run start:dev       # Dev server with hot reload (tsc-watch + dotenvx) + shared package watch (concurrently)
+npm run build           # Compile TypeScript to dist/ (also builds zesty-finance-shared first)
 npm run test            # Run Mocha tests
 npm run lint            # ESLint
 npm run lint:fix        # ESLint with auto-fix
@@ -51,12 +51,23 @@ src/
     └── utils/          # Test utilities
 ```
 
+## Shared Package (`zesty-finance-shared`)
+
+Zod schemas and shared TypeScript types live in `zesty-finance-shared`. Import directly from the package — never define locally what belongs there.
+
+```ts
+import type { AccountRole } from 'zesty-finance-shared';
+import { updateUserSchema, updateUsernameSchema } from 'zesty-finance-shared';
+```
+
+`AccountRole` is defined in the shared package and imported in `express.types.ts` — do not redefine it locally. `npm run start:dev` automatically runs `tsc --watch` on the shared package in parallel via `concurrently`.
+
 ## Key Technologies
 - **Framework:** Express.js
 - **Database:** PostgreSQL via Kysely (type-safe query builder)
 - **Auth:** better-auth (email/password, Google OAuth, Apple OAuth)
 - **Email:** Nodemailer (password reset, email verification)
-- **Validation:** Joi
+- **Validation:** Zod (via `zesty-finance-shared`) + Joi (legacy, placeholder)
 - **Logging:** Winston
 - **Environment:** dotenvx (`.env.local` for dev, `.env.production` for prod)
 - **Testing:** Mocha + Chai
@@ -92,7 +103,7 @@ GET/POST /account  → accountMiddleware         ← calls auth.api.getSession()
 - **`session.create.after`** — runs two operations in parallel: inserts a `login` log entry, and increments `sign_in_count` + sets `sign_in_at` to UTC now on the `accounts` row
 - **`session.update/delete.after`** — logs `refresh_session` / `logout`
 - **`account.create/update/delete.after`** — logs OAuth provider link/update/unlink events
-- **`verification.create/delete.after`** — logs verification token creation/deletion
+- **`verification.create/delete.after`** — logs verification token creation/deletion; uses `verification.value` (the account UUID) as `account_id` — **not** `verification.identifier`, which is a prefixed lookup key like `reset-password:{token}`, not a UUID
 
 ### Email callbacks (`src/config/auth.ts`)
 - `emailAndPassword.onExistingUserSignUp` — if sign-up is attempted with an already-registered email and the account is **unverified**, re-sends the verification email; if already verified, silently no-ops (anti-enumeration: the response always looks like success)
@@ -195,7 +206,7 @@ These are exposed to better-auth as `additionalFields` (`signInCount`, `signInAt
 | Middleware | Purpose |
 |---|---|
 | `requestContextMiddleware` | Stores `ip_address` and `user_agent` in `AsyncLocalStorage` — auto-populated on every `LogRepository.insert` |
-| `accountMiddleware` | Resolves session via `auth.api.getSession()`, populates `req.authenticated` and `req.account` |
+| `accountMiddleware` | Resolves session via `auth.api.getSession()`, populates `req.authenticated` and `req.account`; wrapped in try/catch → `next(error)` |
 | `authorizeMiddleware` | Enforces RBAC access controls |
 | `corsMiddleware` | CORS headers |
 | `loggerMiddleware` | Request logging via Winston |
@@ -237,3 +248,6 @@ Key env vars:
 - ESLint with TypeScript + stylistic rules (`eslint.config.js`)
 - TypeScript strict mode enabled
 - ES Modules throughout (`"type": "module"` in package.json)
+
+## Important: Async Middleware in Express 4
+Express 4 does **not** catch unhandled async errors — they become unhandled promise rejections that crash the process. Always wrap `async` middleware in `try/catch` and call `next(error)` in the catch block. Express 5 handles this automatically, but this project uses Express 4.

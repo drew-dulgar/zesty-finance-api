@@ -14,7 +14,8 @@ import {
 } from './env.js';
 import databaseHooks from './authHooks.js';
 import { sendMail } from './mailer.js';
-import { LogRepository } from '../app/repositories/index.js';
+import { AccountRepository } from '../app/repositories/index.js';
+import logger from '../app/lib/logger.js';
 
 export const auth = betterAuth({
   baseURL: APP_BASE_URL,
@@ -25,22 +26,25 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
     requireEmailVerification: true,
+    minPasswordLength: 8,
+    maxPasswordLength: 128,
     onExistingUserSignUp: async ({ user }, request) => {
       if (!user.emailVerified) {
         await auth.api.sendVerificationEmail({
           body: { email: user.email },
           headers: request?.headers,
-        }).catch(() => {});
+        }).catch((e) => logger.error('onExistingUserSignUp error:', e));
       }
     },
     sendResetPassword: async ({ user, url }) => {
       await sendMail({
         to: user.email,
         ...emailResetPassword(url)
-      });
+      }).catch((e) => logger.error('sendResetPassword error:', e));
     },
     onPasswordReset: async ({ user }) => {
-      await LogRepository.insert({ action: 'reset_password', resource: 'account', resource_id: user.id, account_id: user.id, actor_id: user.id }).catch(() => {});
+      await AccountRepository.logs.resetPassword(user.id, { actor_id: user.id })
+        .catch((e) => logger.error('onPasswordReset error:', e));
     },
   },
   emailVerification: {
@@ -48,10 +52,11 @@ export const auth = betterAuth({
       await sendMail({
         to: user.email,
         ...emailVerifyEmailAddress(url)
-      });
+      }).catch((e) => logger.error('sendVerificationEmail error:', e));
     },
     afterEmailVerification: async (user) => {
-      await LogRepository.insert({ action: 'verify_email', resource: 'account', resource_id: user.id, account_id: user.id, actor_id: user.id }).catch(() => {});
+      await AccountRepository.logs.verifyEmail(user.id, { actor_id: user.id })
+        .catch((e) => logger.error('afterEmailVerification error:', e));
     },
   },
   socialProviders: {
