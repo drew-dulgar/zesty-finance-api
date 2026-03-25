@@ -1,6 +1,8 @@
-import type { AccountPlanSelectable, AccountPlansPlanJson } from '../repositories/zesty-finance-db.js';
-
 import { AccountPlanRepository } from '../repositories/index.js';
+import type {
+  AccountPlanSelectable,
+  AccountPlansPlanJson,
+} from '../repositories/zesty-finance-db.js';
 import { selectableToCamel } from '../utils/objects.js';
 
 export type AccountPlan = {
@@ -21,14 +23,14 @@ const getDefaultPlan = async (): Promise<AccountPlan> => {
   const accountPlan = await AccountPlanRepository.get({
     where: {
       isDefault: true,
-      isDeleted: false
+      isDeleted: false,
     },
     limit: 1,
   }).executeTakeFirstOrThrow();
 
   return selectableToCamel<AccountPlanSelectable, AccountPlan>(accountPlan);
-}
+};
 
 export default {
   getDefaultPlan,
-}
+};

@@ -1,20 +1,34 @@
-import type { Request, Response, NextFunction } from 'express';
-import type { AccountData, AccountUpdateUserInput, AccountUpdateUsernameInput, AccountUpdateUserResponse, AccountUpdateUsernameResponse } from 'zesty-finance-shared';
+import type { NextFunction, Request, Response } from 'express';
+import type {
+  AccountData,
+  AccountUpdateUserInput,
+  AccountUpdateUsernameInput,
+  AccountUpdateUsernameResponse,
+  AccountUpdateUserResponse,
+} from 'zesty-finance-shared';
 import { AccountRepository } from '../../repositories/index.js';
 
-const get = async (req: Request, res: Response<AccountData>, next: NextFunction): Promise<void> => {
+const get = async (
+  req: Request,
+  res: Response<AccountData>,
+  next: NextFunction,
+): Promise<void> => {
   try {
     res.send({
       authenticated: req.authenticated,
       authorized: req.authorized.actions || {},
-      account: req.account
+      account: req.account,
     });
   } catch (error) {
     next(error);
   }
 };
 
-const updateProfile = async (req: Request, res: Response<AccountUpdateUserResponse>, next: NextFunction): Promise<void> => {
+const updateProfile = async (
+  req: Request,
+  res: Response<AccountUpdateUserResponse>,
+  next: NextFunction,
+): Promise<void> => {
   try {
     const { name, firstName, lastName } = req.body as AccountUpdateUserInput;
     const fields = {
@@ -29,7 +43,11 @@ const updateProfile = async (req: Request, res: Response<AccountUpdateUserRespon
   }
 };
 
-const updateUsername = async (req: Request, res: Response<AccountUpdateUsernameResponse>, next: NextFunction): Promise<void> => {
+const updateUsername = async (
+  req: Request,
+  res: Response<AccountUpdateUsernameResponse>,
+  next: NextFunction,
+): Promise<void> => {
   try {
     const { username } = req.body as AccountUpdateUsernameInput;
     await AccountRepository.update(req.account!.id, { username });
@@ -43,4 +61,4 @@ export default {
   get,
   updateProfile,
   updateUsername,
-}
+};

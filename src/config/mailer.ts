@@ -11,7 +11,10 @@ const mailer = nodemailer.createTransport({
   },
 });
 
-export const sendMail = (options: { to: string; subject: string; html: string }) =>
-  mailer.sendMail({ from: MAIL.FROM, ...options });
+export const sendMail = (options: {
+  to: string;
+  subject: string;
+  html: string;
+}) => mailer.sendMail({ from: MAIL.FROM, ...options });
 
 export default mailer;

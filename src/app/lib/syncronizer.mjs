@@ -1,4 +1,4 @@
-import { get, find, pick, isEqual } from 'lodash-es';
+import { find, get, isEqual, pick } from 'lodash-es';
 
 class Syncronizer {
   debug = false;
@@ -8,31 +8,32 @@ class Syncronizer {
   targetData = [];
   values = async (values = {}) => values;
 
-  constructor({ sourceKeys, sourceData, targetKeys, targetData, debug = true } = {}) {
+  constructor({
+    sourceKeys,
+    sourceData,
+    targetKeys,
+    targetData,
+    debug = true,
+  } = {}) {
     this.debug = debug;
-    
+
     this.setSourceKeys(sourceKeys);
     this.setSourceData(sourceData);
     this.setTargetKeys(targetKeys);
     this.setTargetData(targetData);
-    
-
-    return this;
   }
 
   _formatKeys(keys) {
     // force array format
-    const keysToArray = Array.isArray(keys)
-      ? keys
-      : keys.split(',');
+    const keysToArray = Array.isArray(keys) ? keys : keys.split(',');
 
-    return keysToArray.map(key => key.trim());
+    return keysToArray.map((key) => key.trim());
   }
 
   _mapData() {
     const sourceData = this.sourceData.map((sourceData) => {
       const sourceDataKeys = pick(sourceData, this.sourceKeys);
-      const targetData = find(this.targetData, targetData => {
+      const targetData = find(this.targetData, (targetData) => {
         // attempt to find the same record in target data, where the keys values of target data === keys values of source data
         const targetDataKeys = pick(targetData, this.targetKeys);
         return isEqual(sourceDataKeys, targetDataKeys);
@@ -41,13 +42,13 @@ class Syncronizer {
       return {
         keys: sourceDataKeys,
         sourceData,
-        targetData
-      }
+        targetData,
+      };
     });
 
     const targetData = this.targetData.map((targetData) => {
       const targetDataKeys = pick(targetData, this.targetKeys);
-      const sourceData = find(this.sourceData, sourceData => {
+      const sourceData = find(this.sourceData, (sourceData) => {
         // attempt to find the same record in the source data, where the keys values of source data === keys values of target data
         const sourceDataKeys = pick(sourceData, this.sourceKeys);
         return isEqual(targetDataKeys, sourceDataKeys);
@@ -56,14 +57,14 @@ class Syncronizer {
       return {
         keys: targetDataKeys,
         targetData,
-        sourceData
+        sourceData,
       };
     });
 
     return {
       sourceData,
-      targetData
-    }
+      targetData,
+    };
   }
 
   setDebug(debug = true) {
@@ -99,7 +100,9 @@ class Syncronizer {
 
     const create = [];
     const update = [];
-    const remove = targetData.filter(td => !td.sourceData).map(td => ({ keys: td.keys }));
+    const remove = targetData
+      .filter((td) => !td.sourceData)
+      .map((td) => ({ keys: td.keys }));
     const same = [];
 
     for (const sd of sourceData) {
@@ -118,14 +121,18 @@ class Syncronizer {
         const targetTransform = configMap?.targetTrasnform || transform;
 
         const sourceValue = get(sd.sourceData, source, '');
-        const useSourceValue = sourceValue ? sourceValue.toString() : sourceEmpty;
-        
+        const useSourceValue = sourceValue
+          ? sourceValue.toString()
+          : sourceEmpty;
+
         if (!sd.targetData) {
           // create record
           sourceValues[key] = await sourceTransform(useSourceValue);
         } else {
           const targetValue = get(sd.targetData, target, '');
-          const useTargetValue = targetValue ? targetValue.toString() : targetEmpty;
+          const useTargetValue = targetValue
+            ? targetValue.toString()
+            : targetEmpty;
 
           const transformedSourceValue = await sourceTransform(useSourceValue);
           const transformedTargetValue = await targetTransform(useTargetValue);
@@ -140,7 +147,7 @@ class Syncronizer {
       if (!sd.targetData) {
         const values = {
           ...sd.keys,
-          ...sourceValues
+          ...sourceValues,
         };
 
         create.push({ values });
@@ -149,13 +156,13 @@ class Syncronizer {
 
         update.push({
           keys: sd.keys,
-          values
+          values,
         });
       } else {
         same.push({
           keys: sd.keys,
           sourceValues,
-          targetValues
+          targetValues,
         });
       }
     }
@@ -164,7 +171,7 @@ class Syncronizer {
       create,
       update,
       remove,
-      same
+      same,
     };
   }
 }

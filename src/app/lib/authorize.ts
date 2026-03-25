@@ -1,20 +1,20 @@
 import type { Request } from 'express';
-
-import accessControls from '../../config/accessControls.js';
 import type { RouteGrant } from '../../config/accessControls.js';
+import accessControls from '../../config/accessControls.js';
 
 export type AuthorizedResponseType = {
   roles: string[];
   routes: {
     [key: string]: string[];
-  }
+  };
   actions: {
     [key: string]: string[];
-  }
+  };
 };
 
-const toArray = <T>(val: T | T[]): T[] => Array.isArray(val) ? val : [val];
-const splitOrArray = (val: string | string[]): string[] => Array.isArray(val) ? val : val.split(',');
+const toArray = <T>(val: T | T[]): T[] => (Array.isArray(val) ? val : [val]);
+const splitOrArray = (val: string | string[]): string[] =>
+  Array.isArray(val) ? val : val.split(',');
 
 const toRoutes = (val: RouteGrant | RouteGrant[]): RouteGrant[] => toArray(val);
 
@@ -43,7 +43,7 @@ const authorize = (req: Request): AuthorizedResponseType => {
   const authorized: AuthorizedResponseType = {
     roles: [],
     routes: {},
-    actions: {}
+    actions: {},
   };
 
   for (const role in accessControls) {
@@ -70,7 +70,9 @@ const authorize = (req: Request): AuthorizedResponseType => {
             }
 
             if (routeGrant.methods) {
-              authorized.routes[routeGrant.route].push(...splitOrArray(routeGrant.methods));
+              authorized.routes[routeGrant.route].push(
+                ...splitOrArray(routeGrant.methods),
+              );
             }
           }
         }

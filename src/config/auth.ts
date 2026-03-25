@@ -1,21 +1,24 @@
-import { betterAuth } from 'better-auth';
 import { kyselyAdapter } from '@better-auth/kysely-adapter';
-import zestyFinanceDb from '../db/zesty-finance-db.js';
-import { emailVerifyEmailAddress, emailResetPassword } from '../app/templates/emails/index.js';
+import { betterAuth } from 'better-auth';
+import logger from '../app/lib/logger.js';
+import { AccountRepository } from '../app/repositories/index.js';
 import {
-  BETTER_AUTH_SECRET,
+  emailResetPassword,
+  emailVerifyEmailAddress,
+} from '../app/templates/emails/index.js';
+import zestyFinanceDb from '../db/zesty-finance-db.js';
+import databaseHooks from './authHooks.js';
+import {
   APP_BASE_URL,
   APP_ORIGIN_URL,
-  GOOGLE_CLIENT_ID,
-  GOOGLE_CLIENT_SECRET,
+  APPLE_APP_BUNDLE_IDENTIFIER,
   APPLE_CLIENT_ID,
   APPLE_CLIENT_SECRET,
-  APPLE_APP_BUNDLE_IDENTIFIER,
+  BETTER_AUTH_SECRET,
+  GOOGLE_CLIENT_ID,
+  GOOGLE_CLIENT_SECRET,
 } from './env.js';
-import databaseHooks from './authHooks.js';
 import { sendMail } from './mailer.js';
-import { AccountRepository } from '../app/repositories/index.js';
-import logger from '../app/lib/logger.js';
 
 export const auth = betterAuth({
   baseURL: APP_BASE_URL,
@@ -30,20 +33,23 @@ export const auth = betterAuth({
     maxPasswordLength: 128,
     onExistingUserSignUp: async ({ user }, request) => {
       if (!user.emailVerified) {
-        await auth.api.sendVerificationEmail({
-          body: { email: user.email },
-          headers: request?.headers,
-        }).catch((e) => logger.error('onExistingUserSignUp error:', e));
+        await auth.api
+          .sendVerificationEmail({
+            body: { email: user.email },
+            headers: request?.headers,
+          })
+          .catch((e) => logger.error('onExistingUserSignUp error:', e));
       }
     },
     sendResetPassword: async ({ user, url }) => {
       await sendMail({
         to: user.email,
-        ...emailResetPassword(url)
+        ...emailResetPassword(url),
       }).catch((e) => logger.error('sendResetPassword error:', e));
     },
     onPasswordReset: async ({ user }) => {
-      await AccountRepository.logs.resetPassword(user.id, { actor_id: user.id })
+      await AccountRepository.logs
+        .resetPassword(user.id, { actor_id: user.id })
         .catch((e) => logger.error('onPasswordReset error:', e));
     },
   },
@@ -51,11 +57,12 @@ export const auth = betterAuth({
     sendVerificationEmail: async ({ user, url }) => {
       await sendMail({
         to: user.email,
-        ...emailVerifyEmailAddress(url)
+        ...emailVerifyEmailAddress(url),
       }).catch((e) => logger.error('sendVerificationEmail error:', e));
     },
     afterEmailVerification: async (user) => {
-      await AccountRepository.logs.verifyEmail(user.id, { actor_id: user.id })
+      await AccountRepository.logs
+        .verifyEmail(user.id, { actor_id: user.id })
         .catch((e) => logger.error('afterEmailVerification error:', e));
     },
   },
@@ -81,7 +88,11 @@ export const auth = betterAuth({
       firstName: { type: 'string', required: false, fieldName: 'first_name' },
       lastName: { type: 'string', required: false, fieldName: 'last_name' },
       username: { type: 'string', required: false },
-      signInCount: { type: 'number', required: false, fieldName: 'sign_in_count' },
+      signInCount: {
+        type: 'number',
+        required: false,
+        fieldName: 'sign_in_count',
+      },
       signInAt: { type: 'date', required: false, fieldName: 'sign_in_at' },
       isActive: { type: 'boolean', required: false, fieldName: 'is_active' },
       isDeleted: { type: 'boolean', required: false, fieldName: 'is_deleted' },

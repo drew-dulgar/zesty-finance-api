@@ -3,7 +3,7 @@
  * Please do not edit it manually.
  */
 
-import type { ColumnType, Genearated } from "kysely";
+import type { ColumnType, Generated } from 'kysely';
 
 export type Json = JsonValue;
 

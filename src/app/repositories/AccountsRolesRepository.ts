@@ -1,9 +1,15 @@
 import type { Kysely, Transaction } from 'kysely';
-import type { ZestyFinanceDB, AccountRoleSelectable, AccountsRoleInsertable, AccountsRoleUpdateable, AccountsRoleSelectable } from './zesty-finance-db.js';
+import { requestContext } from '../../app/lib/requestContext.js';
 
 import { zestyFinanceDb } from '../../db/index.js';
-import { requestContext } from '../../app/lib/requestContext.js';
 import LogRepository from './LogRepository.js';
+import type {
+  AccountRoleSelectable,
+  AccountsRoleInsertable,
+  AccountsRoleSelectable,
+  AccountsRoleUpdateable,
+  ZestyFinanceDB,
+} from './zesty-finance-db.js';
 
 type AccountsRolesKey = { accountId: string; accountRoleId: string };
 
@@ -13,16 +19,34 @@ const defaultLogValues = () => ({
 });
 
 export const logs = {
-  create: (accountId: string, accountRoleId: string, {...rest} = {}) =>
-    LogRepository.insert({ ...defaultLogValues(), action: 'assign_role', resource_id: accountRoleId, account_id: accountId, ...rest }),
-  remove: (accountId: string, accountRoleId: string, {...rest} = {}) =>
-    LogRepository.insert({ ...defaultLogValues(), action: 'unassign_role', resource_id: accountRoleId, account_id: accountId, ...rest }),
+  create: (accountId: string, accountRoleId: string, { ...rest } = {}) =>
+    LogRepository.insert({
+      ...defaultLogValues(),
+      action: 'assign_role',
+      resource_id: accountRoleId,
+      account_id: accountId,
+      ...rest,
+    }),
+  remove: (accountId: string, accountRoleId: string, { ...rest } = {}) =>
+    LogRepository.insert({
+      ...defaultLogValues(),
+      action: 'unassign_role',
+      resource_id: accountRoleId,
+      account_id: accountId,
+      ...rest,
+    }),
 };
 
-const getByAccountId = (accountId: string): Promise<Pick<AccountRoleSelectable, 'id' | 'label'>[]> => {
+const getByAccountId = (
+  accountId: string,
+): Promise<Pick<AccountRoleSelectable, 'id' | 'label'>[]> => {
   return zestyFinanceDb
     .selectFrom('accounts_roles')
-    .innerJoin('account_roles', 'account_roles.id', 'accounts_roles.account_role_id')
+    .innerJoin(
+      'account_roles',
+      'account_roles.id',
+      'accounts_roles.account_role_id',
+    )
     .select(['account_roles.id', 'account_roles.label'])
     .where('accounts_roles.account_id', '=', accountId)
     .where('account_roles.is_active', '=', true)
@@ -32,9 +56,13 @@ const getByAccountId = (accountId: string): Promise<Pick<AccountRoleSelectable, 
 
 const insert = async (
   values: AccountsRoleInsertable,
-  db: Kysely<ZestyFinanceDB> | Transaction<ZestyFinanceDB> = zestyFinanceDb
+  db: Kysely<ZestyFinanceDB> | Transaction<ZestyFinanceDB> = zestyFinanceDb,
 ): Promise<AccountsRoleSelectable> => {
-  const result = await db.insertInto('accounts_roles').values(values).returningAll().executeTakeFirstOrThrow();
+  const result = await db
+    .insertInto('accounts_roles')
+    .values(values)
+    .returningAll()
+    .executeTakeFirstOrThrow();
   await logs.create(result.account_id, result.account_role_id);
   return result;
 };
@@ -42,7 +70,7 @@ const insert = async (
 const update = (
   { accountId, accountRoleId }: AccountsRolesKey,
   values: AccountsRoleUpdateable,
-  db: Kysely<ZestyFinanceDB> | Transaction<ZestyFinanceDB> = zestyFinanceDb
+  db: Kysely<ZestyFinanceDB> | Transaction<ZestyFinanceDB> = zestyFinanceDb,
 ) => {
   return db
     .updateTable('accounts_roles')
@@ -54,7 +82,7 @@ const update = (
 
 const remove = async (
   { accountId, accountRoleId }: AccountsRolesKey,
-  db: Kysely<ZestyFinanceDB> | Transaction<ZestyFinanceDB> = zestyFinanceDb
+  db: Kysely<ZestyFinanceDB> | Transaction<ZestyFinanceDB> = zestyFinanceDb,
 ) => {
   const result = await db
     .deleteFrom('accounts_roles')

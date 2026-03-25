@@ -1,8 +1,12 @@
-import type { Kysely, Transaction, SelectExpression } from 'kysely';
-import type { ZestyFinanceDB, LogSelectable, LogInsertable, LogUpdateable } from './zesty-finance-db.js';
-
+import type { Kysely, SelectExpression, Transaction } from 'kysely';
 import { zestyFinanceDb } from '../../db/index.js';
 import { requestContext } from '../lib/requestContext.js';
+import type {
+  LogInsertable,
+  LogSelectable,
+  LogUpdateable,
+  ZestyFinanceDB,
+} from './zesty-finance-db.js';
 
 type LogWhere = {
   id?: string;
@@ -15,7 +19,19 @@ type LogWhere = {
 
 const get = (
   {
-    select = ['id', 'account_id', 'actor_id', 'action', 'resource', 'resource_id', 'metadata', 'ip_address', 'user_agent', 'created_at', 'updated_at'],
+    select = [
+      'id',
+      'account_id',
+      'actor_id',
+      'action',
+      'resource',
+      'resource_id',
+      'metadata',
+      'ip_address',
+      'user_agent',
+      'created_at',
+      'updated_at',
+    ],
     where = {},
     limit,
     offset,
@@ -25,11 +41,9 @@ const get = (
     limit?: number;
     offset?: number;
   },
-  db: Kysely<ZestyFinanceDB> | Transaction<ZestyFinanceDB> = zestyFinanceDb
+  db: Kysely<ZestyFinanceDB> | Transaction<ZestyFinanceDB> = zestyFinanceDb,
 ): Promise<LogSelectable[]> => {
-  let query = db
-    .selectFrom('logs')
-    .select(select);
+  let query = db.selectFrom('logs').select(select);
 
   if (typeof where.id !== 'undefined') {
     query = query.where('id', '=', where.id);
@@ -68,7 +82,7 @@ const get = (
 
 const insert = (
   values: LogInsertable,
-  db: Kysely<ZestyFinanceDB> | Transaction<ZestyFinanceDB> = zestyFinanceDb
+  db: Kysely<ZestyFinanceDB> | Transaction<ZestyFinanceDB> = zestyFinanceDb,
 ): Promise<LogSelectable | undefined> => {
   const ctx = requestContext.getStore();
   return db
@@ -85,18 +99,14 @@ const insert = (
 const update = (
   id: string,
   values: LogUpdateable,
-  db: Kysely<ZestyFinanceDB> | Transaction<ZestyFinanceDB> = zestyFinanceDb
+  db: Kysely<ZestyFinanceDB> | Transaction<ZestyFinanceDB> = zestyFinanceDb,
 ) => {
-  return db
-    .updateTable('logs')
-    .set(values)
-    .where('id', '=', id)
-    .execute();
+  return db.updateTable('logs').set(values).where('id', '=', id).execute();
 };
 
 const remove = (
   id: string,
-  db: Kysely<ZestyFinanceDB> | Transaction<ZestyFinanceDB> = zestyFinanceDb
+  db: Kysely<ZestyFinanceDB> | Transaction<ZestyFinanceDB> = zestyFinanceDb,
 ) => {
   return db.deleteFrom('logs').where('id', '=', id).execute();
 };

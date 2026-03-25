@@ -47,9 +47,12 @@ export interface AccountVerificationsTable {
   updated_at: Generated<Date | string>;
 }
 
-export type AccountVerificationSelectable = Selectable<AccountVerificationsTable>;
-export type AccountVerificationInsertable = Insertable<AccountVerificationsTable>;
-export type AccountVerificationUpdateable = Updateable<AccountVerificationsTable>;
+export type AccountVerificationSelectable =
+  Selectable<AccountVerificationsTable>;
+export type AccountVerificationInsertable =
+  Insertable<AccountVerificationsTable>;
+export type AccountVerificationUpdateable =
+  Updateable<AccountVerificationsTable>;
 
 // Accounts — better-auth user table
 export interface AccountsTable {
@@ -167,4 +170,4 @@ export interface ZestyFinanceDB {
   accounts_roles: AccountsRolesTable;
   logs: LogsTable;
   sessions: SessionsTable;
-};
+}

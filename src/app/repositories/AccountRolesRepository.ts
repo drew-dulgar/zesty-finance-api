@@ -1,9 +1,14 @@
-import type { Kysely, Transaction, SelectExpression } from 'kysely';
-import type { ZestyFinanceDB, AccountRoleSelectable, AccountRoleInsertable, AccountRoleUpdateable } from './zesty-finance-db.js';
+import type { Kysely, SelectExpression, Transaction } from 'kysely';
+import { requestContext } from '../../app/lib/requestContext.js';
 
 import { zestyFinanceDb } from '../../db/index.js';
-import { requestContext } from '../../app/lib/requestContext.js';
 import LogRepository from './LogRepository.js';
+import type {
+  AccountRoleInsertable,
+  AccountRoleSelectable,
+  AccountRoleUpdateable,
+  ZestyFinanceDB,
+} from './zesty-finance-db.js';
 
 type AccountRoleWhere = {
   id?: string;
@@ -19,17 +24,44 @@ const defaultLogValues = () => ({
 });
 
 export const logs = {
-  create: (id: string, {...rest} = {}) =>
-    LogRepository.insert({ ...defaultLogValues(), action: 'create', resource_id: id, account_id: null, ...rest }),
-  update: (id: string, {...rest} = {}) =>
-    LogRepository.insert({ ...defaultLogValues(), action: 'update', resource_id: id, account_id: null, ...rest }),
-  remove: (id: string, {...rest} = {}) =>
-    LogRepository.insert({ ...defaultLogValues(), action: 'delete', resource_id: id, account_id: null, ...rest }),
+  create: (id: string, { ...rest } = {}) =>
+    LogRepository.insert({
+      ...defaultLogValues(),
+      action: 'create',
+      resource_id: id,
+      account_id: null,
+      ...rest,
+    }),
+  update: (id: string, { ...rest } = {}) =>
+    LogRepository.insert({
+      ...defaultLogValues(),
+      action: 'update',
+      resource_id: id,
+      account_id: null,
+      ...rest,
+    }),
+  remove: (id: string, { ...rest } = {}) =>
+    LogRepository.insert({
+      ...defaultLogValues(),
+      action: 'delete',
+      resource_id: id,
+      account_id: null,
+      ...rest,
+    }),
 };
 
 const get = (
   {
-    select = ['id', 'label', 'description', 'is_default', 'is_active', 'is_deleted', 'created_at', 'updated_at'],
+    select = [
+      'id',
+      'label',
+      'description',
+      'is_default',
+      'is_active',
+      'is_deleted',
+      'created_at',
+      'updated_at',
+    ],
     where = {},
     limit,
     offset,
@@ -39,7 +71,7 @@ const get = (
     limit?: number;
     offset?: number;
   },
-  db: Kysely<ZestyFinanceDB> | Transaction<ZestyFinanceDB> = zestyFinanceDb
+  db: Kysely<ZestyFinanceDB> | Transaction<ZestyFinanceDB> = zestyFinanceDb,
 ) => {
   let query = db.selectFrom('account_roles').select(select);
 
@@ -76,9 +108,13 @@ const get = (
 
 const insert = async (
   values: AccountRoleInsertable,
-  db: Kysely<ZestyFinanceDB> | Transaction<ZestyFinanceDB> = zestyFinanceDb
+  db: Kysely<ZestyFinanceDB> | Transaction<ZestyFinanceDB> = zestyFinanceDb,
 ): Promise<AccountRoleSelectable> => {
-  const result = await db.insertInto('account_roles').values(values).returningAll().executeTakeFirstOrThrow();
+  const result = await db
+    .insertInto('account_roles')
+    .values(values)
+    .returningAll()
+    .executeTakeFirstOrThrow();
   await logs.create(result.id);
   return result;
 };
@@ -86,9 +122,13 @@ const insert = async (
 const update = async (
   id: string,
   values: AccountRoleUpdateable,
-  db: Kysely<ZestyFinanceDB> | Transaction<ZestyFinanceDB> = zestyFinanceDb
+  db: Kysely<ZestyFinanceDB> | Transaction<ZestyFinanceDB> = zestyFinanceDb,
 ) => {
-  const result = await db.updateTable('account_roles').set(values).where('id', '=', id).execute();
+  const result = await db
+    .updateTable('account_roles')
+    .set(values)
+    .where('id', '=', id)
+    .execute();
   await logs.update(id);
   return result;
 };
@@ -96,10 +136,14 @@ const update = async (
 const remove = async (
   id: string,
   softDelete = true,
-  db: Kysely<ZestyFinanceDB> | Transaction<ZestyFinanceDB> = zestyFinanceDb
+  db: Kysely<ZestyFinanceDB> | Transaction<ZestyFinanceDB> = zestyFinanceDb,
 ) => {
   const result = softDelete
-    ? await db.updateTable('account_roles').set({ is_deleted: true }).where('id', '=', id).execute()
+    ? await db
+        .updateTable('account_roles')
+        .set({ is_deleted: true })
+        .where('id', '=', id)
+        .execute()
     : await db.deleteFrom('account_roles').where('id', '=', id).execute();
   await logs.remove(id);
   return result;

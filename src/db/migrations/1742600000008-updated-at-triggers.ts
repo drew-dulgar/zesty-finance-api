@@ -1,4 +1,4 @@
-import { Kysely, sql } from 'kysely';
+import { type Kysely, sql } from 'kysely';
 
 const tables = [
   'accounts',
@@ -34,7 +34,9 @@ export const up = async (db: Kysely<any>): Promise<void> => {
 
 export const down = async (db: Kysely<any>): Promise<void> => {
   for (const table of tables) {
-    await sql`DROP TRIGGER IF EXISTS set_updated_at ON ${sql.table(table)}`.execute(db);
+    await sql`DROP TRIGGER IF EXISTS set_updated_at ON ${sql.table(table)}`.execute(
+      db,
+    );
   }
 
   await sql`DROP FUNCTION IF EXISTS set_updated_at`.execute(db);

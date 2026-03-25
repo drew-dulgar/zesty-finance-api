@@ -20,8 +20,4 @@ const initializeAuthorizedRoutes = () => {
   return router;
 };
 
-
-export {
-  initializeRoutes,
-  initializeAuthorizedRoutes
-};
+export { initializeAuthorizedRoutes, initializeRoutes };

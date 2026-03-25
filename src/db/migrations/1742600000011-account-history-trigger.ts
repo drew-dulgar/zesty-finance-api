@@ -1,4 +1,4 @@
-import { Kysely, sql } from 'kysely';
+import { type Kysely, sql } from 'kysely';
 
 export const up = async (db: Kysely<any>): Promise<void> => {
   await sql`
@@ -41,6 +41,8 @@ export const up = async (db: Kysely<any>): Promise<void> => {
 };
 
 export const down = async (db: Kysely<any>): Promise<void> => {
-  await sql`DROP TRIGGER IF EXISTS track_account_field_changes ON accounts`.execute(db);
+  await sql`DROP TRIGGER IF EXISTS track_account_field_changes ON accounts`.execute(
+    db,
+  );
   await sql`DROP FUNCTION IF EXISTS track_account_field_changes`.execute(db);
 };

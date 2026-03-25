@@ -3,7 +3,7 @@
  * Please do not edit it manually.
  */
 
-import type { Generated, ColumnType } from 'kysely';
+import type { ColumnType, Generated } from 'kysely';
 
 export type Json = JsonValue;
 
@@ -47,10 +47,8 @@ export interface AccountsRole {
   accountRoleId: number;
 }
 
-
 export interface Session {
   expired: Timestamp;
   sess: Json;
   sid: string;
 }
-

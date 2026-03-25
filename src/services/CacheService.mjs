@@ -10,7 +10,7 @@ class CacheService {
       deleteOnExpire: true,
       enableLegacyCallbacks: false,
       maxKeys: -1,
-      ...args
+      ...args,
     };
 
     if (!APP_CACHE) {
@@ -20,16 +20,36 @@ class CacheService {
     this.cache = new NodeCache(options);
   }
 
-  has(key) { return this.cache.has(key); }
-  get(key) { return this.cache.get(key); }
-  set(key, val, ttl) { return this.cache.set(key, val, ttl); }
-  take(key) { return this.cache.take(key); }
-  delete(key) { return this.cache.del(key); }
-  keys() { return this.cache.keys(); }
-  stats() { return this.cache.getStats(); }
-  flushStates() { return this.cache.flushStats(); }
-  flushAll() { return this.cache.flushAll(); }
-  close() { return this.cache.close(); }
+  has(key) {
+    return this.cache.has(key);
+  }
+  get(key) {
+    return this.cache.get(key);
+  }
+  set(key, val, ttl) {
+    return this.cache.set(key, val, ttl);
+  }
+  take(key) {
+    return this.cache.take(key);
+  }
+  delete(key) {
+    return this.cache.del(key);
+  }
+  keys() {
+    return this.cache.keys();
+  }
+  stats() {
+    return this.cache.getStats();
+  }
+  flushStates() {
+    return this.cache.flushStats();
+  }
+  flushAll() {
+    return this.cache.flushAll();
+  }
+  close() {
+    return this.cache.close();
+  }
 }
 
 export default CacheService;

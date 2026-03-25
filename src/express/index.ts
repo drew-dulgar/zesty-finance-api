@@ -1,15 +1,17 @@
-import type { Application } from 'express';
-
-import express from 'express';
 import { toNodeHandler } from 'better-auth/node';
-import { auth } from '../config/auth.js';
-import {initializeRoutes, initializeAuthorizedRoutes} from '../app/controllers/routes.js';
+import type { Application } from 'express';
+import express from 'express';
 import {
+  initializeAuthorizedRoutes,
+  initializeRoutes,
+} from '../app/controllers/routes.js';
+import { auth } from '../config/auth.js';
+import {
+  accountMiddleware,
+  authorizeMiddleware,
   corsMiddleware,
   error404Middleware,
   errorHandlerMiddleware,
-  accountMiddleware,
-  authorizeMiddleware,
   loggerMiddleware,
   requestContextMiddleware,
 } from './middleware/index.js';
@@ -43,5 +45,3 @@ const initializeApplication = () => {
 };
 
 export default initializeApplication;
-
-

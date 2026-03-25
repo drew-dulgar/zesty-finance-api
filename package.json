@@ -15,8 +15,8 @@
     "start:prod": "npm run build && dotenvx run -f .env.production -- ts-node ./dist/index.mjs",
     "test": "mocha ./src/tests/**/*.spec.mjs",
     "test:watch": "npm run test --watch",
-    "lint": "eslint",
-    "lint:fix": "eslint --fix"
+    "lint": "biome check .",
+    "lint:fix": "biome check --write ."
   },
   "author": "",
   "license": "ISC",
@@ -37,22 +37,17 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
-    "@eslint/js": "^9.20.0",
-    "@stylistic/eslint-plugin-ts": "^4.4.1",
+    "@biomejs/biome": "2.4.7",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.0",
     "@types/node": "^22.13.4",
     "@types/nodemailer": "^7.0.11",
     "@types/pg": "^8.16.0",
     "@types/winston": "^2.4.4",
-    "@typescript-eslint/parser": "^8.56.0",
     "chai": "^5.2.0",
-    "eslint": "^9.20.1",
-    "globals": "^17.3.0",
     "mocha": "^11.7.5",
     "nodemon": "^3.1.14",
     "tsc-watch": "^6.2.1",
-    "typescript": "^5.9.3",
-    "typescript-eslint": "^8.56.0"
+    "typescript": "^6.0.0"
   }
 }

@@ -1,9 +1,14 @@
-import type { Kysely, Transaction, SelectExpression } from 'kysely';
-import type { ZestyFinanceDB, SessionSelectable, SessionInsertable, SessionUpdateable } from './zesty-finance-db.js';
+import type { Kysely, SelectExpression, Transaction } from 'kysely';
+import { requestContext } from '../../app/lib/requestContext.js';
 
 import { zestyFinanceDb } from '../../db/index.js';
-import { requestContext } from '../../app/lib/requestContext.js';
 import LogRepository from './LogRepository.js';
+import type {
+  SessionInsertable,
+  SessionSelectable,
+  SessionUpdateable,
+  ZestyFinanceDB,
+} from './zesty-finance-db.js';
 
 type SessionWhere = {
   id?: string;
@@ -17,17 +22,41 @@ const defaultLogValues = () => ({
 });
 
 export const logs = {
-  login: (accountId: string, {...rest} = {}) =>
-    LogRepository.insert({ ...defaultLogValues(), action: 'login', account_id: accountId, ...rest }),
-  refreshSession: (accountId: string, {...rest} = {}) =>
-    LogRepository.insert({ ...defaultLogValues(), action: 'refresh_session', account_id: accountId, ...rest }),
-  logout: (accountId: string, {...rest} = {}) =>
-    LogRepository.insert({ ...defaultLogValues(), action: 'logout', account_id: accountId, ...rest }),
+  login: (accountId: string, { ...rest } = {}) =>
+    LogRepository.insert({
+      ...defaultLogValues(),
+      action: 'login',
+      account_id: accountId,
+      ...rest,
+    }),
+  refreshSession: (accountId: string, { ...rest } = {}) =>
+    LogRepository.insert({
+      ...defaultLogValues(),
+      action: 'refresh_session',
+      account_id: accountId,
+      ...rest,
+    }),
+  logout: (accountId: string, { ...rest } = {}) =>
+    LogRepository.insert({
+      ...defaultLogValues(),
+      action: 'logout',
+      account_id: accountId,
+      ...rest,
+    }),
 };
 
 const get = (
   {
-    select = ['id', 'expires_at', 'token', 'ip_address', 'user_agent', 'account_id', 'created_at', 'updated_at'],
+    select = [
+      'id',
+      'expires_at',
+      'token',
+      'ip_address',
+      'user_agent',
+      'account_id',
+      'created_at',
+      'updated_at',
+    ],
     where = {},
     limit,
     offset,
@@ -37,7 +66,7 @@ const get = (
     limit?: number;
     offset?: number;
   },
-  db: Kysely<ZestyFinanceDB> | Transaction<ZestyFinanceDB> = zestyFinanceDb
+  db: Kysely<ZestyFinanceDB> | Transaction<ZestyFinanceDB> = zestyFinanceDb,
 ): Promise<SessionSelectable[]> => {
   let query = db.selectFrom('sessions').select(select);
 
@@ -66,9 +95,13 @@ const get = (
 
 const insert = async (
   values: SessionInsertable,
-  db: Kysely<ZestyFinanceDB> | Transaction<ZestyFinanceDB> = zestyFinanceDb
+  db: Kysely<ZestyFinanceDB> | Transaction<ZestyFinanceDB> = zestyFinanceDb,
 ): Promise<SessionSelectable> => {
-  const result = await db.insertInto('sessions').values(values).returningAll().executeTakeFirstOrThrow();
+  const result = await db
+    .insertInto('sessions')
+    .values(values)
+    .returningAll()
+    .executeTakeFirstOrThrow();
   await logs.login(result.account_id);
   return result;
 };
@@ -76,16 +109,20 @@ const insert = async (
 const update = async (
   id: string,
   values: SessionUpdateable,
-  db: Kysely<ZestyFinanceDB> | Transaction<ZestyFinanceDB> = zestyFinanceDb
+  db: Kysely<ZestyFinanceDB> | Transaction<ZestyFinanceDB> = zestyFinanceDb,
 ) => {
-  const result = await db.updateTable('sessions').set(values).where('id', '=', id).execute();
+  const result = await db
+    .updateTable('sessions')
+    .set(values)
+    .where('id', '=', id)
+    .execute();
   await logs.refreshSession(id);
   return result;
 };
 
 const remove = async (
   id: string,
-  db: Kysely<ZestyFinanceDB> | Transaction<ZestyFinanceDB> = zestyFinanceDb
+  db: Kysely<ZestyFinanceDB> | Transaction<ZestyFinanceDB> = zestyFinanceDb,
 ) => {
   const result = await db.deleteFrom('sessions').where('id', '=', id).execute();
   await logs.logout(id);

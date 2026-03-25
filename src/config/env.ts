@@ -4,7 +4,7 @@ export const IS_PRODUCTION = NODE_ENV === 'production';
 
 // Export all environment vars needed throughout the app
 export const APP_PORT = process.env.APP_PORT || 3001;
-export const APP_CACHE = process.env.APP_CACHE === 'true' ? true : false;
+export const APP_CACHE = process.env.APP_CACHE === 'true';
 export const APP_LOG_LEVEL = process.env.APP_LOG_LEVEL || 'error';
 export const APP_ORIGIN_URL = process.env.APP_ORIGIN_URL;
 
@@ -16,7 +16,8 @@ export const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
 
 export const APPLE_CLIENT_ID = process.env.APPLE_CLIENT_ID;
 export const APPLE_CLIENT_SECRET = process.env.APPLE_CLIENT_SECRET;
-export const APPLE_APP_BUNDLE_IDENTIFIER = process.env.APPLE_APP_BUNDLE_IDENTIFIER;
+export const APPLE_APP_BUNDLE_IDENTIFIER =
+  process.env.APPLE_APP_BUNDLE_IDENTIFIER;
 
 export const NPM_PACKAGE_VERSION = process.env.npm_package_version || null;
 
@@ -35,6 +36,5 @@ export const ZESTY_FINANCE_DB = Object.freeze({
   DATABASE: process.env.ZESTY_FINANCE_DB_DATABASE,
   USER: process.env.ZESTY_FINANCE_DB_USER,
   PASSWORD: process.env.ZESTY_FINANCE_DB_PASSWORD,
-  POOLS: process.env.ZESTY_FINANCE_DB_POOLS
+  POOLS: process.env.ZESTY_FINANCE_DB_POOLS,
 });
-

@@ -1,9 +1,14 @@
-import type { Kysely, Transaction, SelectExpression } from 'kysely';
-import type { ZestyFinanceDB, AccountHistorySelectable, AccountHistoryInsertable, AccountHistoryUpdateable } from './zesty-finance-db.js';
+import type { Kysely, SelectExpression, Transaction } from 'kysely';
+import { requestContext } from '../../app/lib/requestContext.js';
 
 import { zestyFinanceDb } from '../../db/index.js';
-import { requestContext } from '../../app/lib/requestContext.js';
 import LogRepository from './LogRepository.js';
+import type {
+  AccountHistoryInsertable,
+  AccountHistorySelectable,
+  AccountHistoryUpdateable,
+  ZestyFinanceDB,
+} from './zesty-finance-db.js';
 
 type AccountHistoryWhere = {
   id?: string;
@@ -17,12 +22,30 @@ const defaultLogValues = () => ({
 });
 
 export const logs = {
-  create: (id: string, accountId: string, {...rest} = {}) =>
-    LogRepository.insert({ ...defaultLogValues(), action: 'create', resource_id: id, account_id: accountId, ...rest }),
-  update: (id: string, {...rest} = {}) =>
-    LogRepository.insert({ ...defaultLogValues(), action: 'update', resource_id: id, account_id: null, ...rest }),
-  remove: (id: string, {...rest} = {}) =>
-    LogRepository.insert({ ...defaultLogValues(), action: 'delete', resource_id: id, account_id: null, ...rest }),
+  create: (id: string, accountId: string, { ...rest } = {}) =>
+    LogRepository.insert({
+      ...defaultLogValues(),
+      action: 'create',
+      resource_id: id,
+      account_id: accountId,
+      ...rest,
+    }),
+  update: (id: string, { ...rest } = {}) =>
+    LogRepository.insert({
+      ...defaultLogValues(),
+      action: 'update',
+      resource_id: id,
+      account_id: null,
+      ...rest,
+    }),
+  remove: (id: string, { ...rest } = {}) =>
+    LogRepository.insert({
+      ...defaultLogValues(),
+      action: 'delete',
+      resource_id: id,
+      account_id: null,
+      ...rest,
+    }),
 };
 
 const get = (
@@ -37,7 +60,7 @@ const get = (
     limit?: number;
     offset?: number;
   },
-  db: Kysely<ZestyFinanceDB> | Transaction<ZestyFinanceDB> = zestyFinanceDb
+  db: Kysely<ZestyFinanceDB> | Transaction<ZestyFinanceDB> = zestyFinanceDb,
 ): Promise<AccountHistorySelectable[]> => {
   let query = db.selectFrom('account_history').select(select);
 
@@ -66,9 +89,13 @@ const get = (
 
 const insert = async (
   values: AccountHistoryInsertable,
-  db: Kysely<ZestyFinanceDB> | Transaction<ZestyFinanceDB> = zestyFinanceDb
+  db: Kysely<ZestyFinanceDB> | Transaction<ZestyFinanceDB> = zestyFinanceDb,
 ): Promise<AccountHistorySelectable> => {
-  const result = await db.insertInto('account_history').values(values).returningAll().executeTakeFirstOrThrow();
+  const result = await db
+    .insertInto('account_history')
+    .values(values)
+    .returningAll()
+    .executeTakeFirstOrThrow();
   await logs.create(result.id, result.account_id);
   return result;
 };
@@ -76,18 +103,25 @@ const insert = async (
 const update = async (
   id: string,
   values: AccountHistoryUpdateable,
-  db: Kysely<ZestyFinanceDB> | Transaction<ZestyFinanceDB> = zestyFinanceDb
+  db: Kysely<ZestyFinanceDB> | Transaction<ZestyFinanceDB> = zestyFinanceDb,
 ) => {
-  const result = await db.updateTable('account_history').set(values).where('id', '=', id).execute();
+  const result = await db
+    .updateTable('account_history')
+    .set(values)
+    .where('id', '=', id)
+    .execute();
   await logs.update(id);
   return result;
 };
 
 const remove = async (
   id: string,
-  db: Kysely<ZestyFinanceDB> | Transaction<ZestyFinanceDB> = zestyFinanceDb
+  db: Kysely<ZestyFinanceDB> | Transaction<ZestyFinanceDB> = zestyFinanceDb,
 ) => {
-  const result = await db.deleteFrom('account_history').where('id', '=', id).execute();
+  const result = await db
+    .deleteFrom('account_history')
+    .where('id', '=', id)
+    .execute();
   await logs.remove(id);
   return result;
 };
