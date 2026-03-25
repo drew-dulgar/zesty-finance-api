@@ -1,7 +1,7 @@
 import type { Request } from 'express';
 
 import accessControls from '../../config/accessControls.js';
-import type { Grant } from '../../config/accessControls.js';
+import type { RouteGrant } from '../../config/accessControls.js';
 
 export type AuthorizedResponseType = {
   roles: string[];
@@ -16,7 +16,7 @@ export type AuthorizedResponseType = {
 const toArray = <T>(val: T | T[]): T[] => Array.isArray(val) ? val : [val];
 const splitOrArray = (val: string | string[]): string[] => Array.isArray(val) ? val : val.split(',');
 
-const toGrants = (val: Grant | Grant[]): Grant[] => toArray(val);
+const toRoutes = (val: RouteGrant | RouteGrant[]): RouteGrant[] => toArray(val);
 
 const validRoutes: { [route: string]: string[] } = {};
 
@@ -24,15 +24,16 @@ for (const role in accessControls) {
   const { grants } = accessControls[role];
 
   for (const resource in grants) {
-    for (const grant of toGrants(grants[resource])) {
-      if (!grant.route) continue;
+    const { routes } = grants[resource];
+    if (!routes) continue;
 
-      if (!validRoutes[grant.route]) {
-        validRoutes[grant.route] = [];
+    for (const routeGrant of toRoutes(routes)) {
+      if (!validRoutes[routeGrant.route]) {
+        validRoutes[routeGrant.route] = [];
       }
 
-      if (grant.methods) {
-        validRoutes[grant.route].push(...splitOrArray(grant.methods));
+      if (routeGrant.methods) {
+        validRoutes[routeGrant.route].push(...splitOrArray(routeGrant.methods));
       }
     }
   }
@@ -52,22 +53,24 @@ const authorize = (req: Request): AuthorizedResponseType => {
       authorized.roles.push(role);
 
       for (const resource in accessControl.grants) {
+        const { actions, routes } = accessControl.grants[resource];
+
         if (!authorized.actions[resource]) {
           authorized.actions[resource] = [];
         }
 
-        for (const grant of toGrants(accessControl.grants[resource])) {
-          if (grant.actions) {
-            authorized.actions[resource].push(...splitOrArray(grant.actions));
-          }
+        if (actions) {
+          authorized.actions[resource].push(...splitOrArray(actions));
+        }
 
-          if (grant.route) {
-            if (!authorized.routes[grant.route]) {
-              authorized.routes[grant.route] = [];
+        if (routes) {
+          for (const routeGrant of toRoutes(routes)) {
+            if (!authorized.routes[routeGrant.route]) {
+              authorized.routes[routeGrant.route] = [];
             }
 
-            if (grant.methods) {
-              authorized.routes[grant.route].push(...splitOrArray(grant.methods));
+            if (routeGrant.methods) {
+              authorized.routes[routeGrant.route].push(...splitOrArray(routeGrant.methods));
             }
           }
         }

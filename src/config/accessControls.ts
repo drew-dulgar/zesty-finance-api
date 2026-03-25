@@ -20,17 +20,21 @@ const aliases: Aliases = {
   }
 };
 
+type RouteGrant = {
+  route: string;
+  methods?: AuthorizeAccessControlGrantMethods;
+};
+
 type Grant = {
   actions?: AuthorizeAccessControlGrantActions;
-  route?: string;
-  methods?: AuthorizeAccessControlGrantMethods;
+  routes?: RouteGrant | RouteGrant[];
 };
 
 type AuthorizeAccessControls = {
   [key: '*' | string]: {
     selector: (params: Request) => boolean;
     grants: {
-      [resource: string]: Grant | Grant[];
+      [resource: string]: Grant;
     }
   }
 }
@@ -40,9 +44,7 @@ const accessControls: AuthorizeAccessControls = {
     selector: () => true,
     grants: {
       account: {
-        actions: 'read',
-        route: '/account',
-        methods: 'GET'
+        routes: { route: '/account', methods: 'GET' }
       }
     }
   },
@@ -50,24 +52,20 @@ const accessControls: AuthorizeAccessControls = {
     selector: ({ authenticated }) => !authenticated,
     grants: {
       auth: {
-        route: '/auth/*',
-      },
+        routes: { route: '/auth/*' }
+      }
     }
   },
   authenticated: {
     selector: ({ authenticated }) => authenticated,
     grants: {
-      account: [
-        {
-          route: '/account',
-          actions: ['update', 'delete'],
-          methods: ['PUT', 'PATCH', 'DESTROY']
-        },
-        {
-          route: '/account/username',
-          methods: ['PATCH']
-        }
-      ],
+      account: {
+        actions: ['update', 'delete'],
+        routes: [
+          { route: '/account', methods: ['PUT', 'PATCH', 'DESTROY'] },
+          { route: '/account/username', methods: ['PATCH'] }
+        ]
+      }
     }
   },
   admin: {
@@ -75,12 +73,11 @@ const accessControls: AuthorizeAccessControls = {
     grants: {
       '*': {
         actions: '*',
-        route: '*',
-        methods: '*'
+        routes: { route: '*', methods: '*' }
       }
     }
   }
 };
 
 export default accessControls;
-export type { Grant, AuthorizeAccessControls };
+export type { Grant, RouteGrant, AuthorizeAccessControls };

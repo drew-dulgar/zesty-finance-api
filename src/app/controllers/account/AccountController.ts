@@ -1,8 +1,8 @@
 import type { Request, Response, NextFunction } from 'express';
-import type { AccountUpdateUserInput, AccountUpdateUsernameInput } from 'zesty-finance-shared';
+import type { AccountData, AccountUpdateUserInput, AccountUpdateUsernameInput, AccountUpdateUserResponse, AccountUpdateUsernameResponse } from 'zesty-finance-shared';
 import { AccountRepository } from '../../repositories/index.js';
 
-const get = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+const get = async (req: Request, res: Response<AccountData>, next: NextFunction): Promise<void> => {
   try {
     res.send({
       authenticated: req.authenticated,
@@ -14,9 +14,7 @@ const get = async (req: Request, res: Response, next: NextFunction): Promise<voi
   }
 };
 
-const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
-
-const updateProfile = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+const updateProfile = async (req: Request, res: Response<AccountUpdateUserResponse>, next: NextFunction): Promise<void> => {
   try {
     const { name, firstName, lastName } = req.body as AccountUpdateUserInput;
     const fields = {
@@ -24,19 +22,18 @@ const updateProfile = async (req: Request, res: Response, next: NextFunction): P
       ...(firstName !== undefined && { first_name: firstName }),
       ...(lastName !== undefined && { last_name: lastName }),
     };
-    await sleep(2000);
     await AccountRepository.update(req.account!.id, fields);
-    res.send({ success: true });
+    res.json({ success: true });
   } catch (error) {
     next(error);
   }
 };
 
-const updateUsername = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+const updateUsername = async (req: Request, res: Response<AccountUpdateUsernameResponse>, next: NextFunction): Promise<void> => {
   try {
     const { username } = req.body as AccountUpdateUsernameInput;
     await AccountRepository.update(req.account!.id, { username });
-    res.send({ success: true });
+    res.json({ success: true });
   } catch (error) {
     next(error);
   }

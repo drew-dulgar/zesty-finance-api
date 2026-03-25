@@ -9,6 +9,8 @@ updates:
     directory: "/" # Location of package manifests
     schedule:
       interval: "weekly"
+    ignore:
+      - dependency-name: zesty-finance-shared
     groups:
       all-minor-patch:
         patterns:

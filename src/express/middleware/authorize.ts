@@ -3,11 +3,14 @@ import type { Request, Response, NextFunction } from 'express';
 
 import authorize, { validRoutes } from '../../app/lib/authorize.js';
 import error404Middleware from '../middleware/error404.js';
+import { IS_DEVELOPMENT } from '../../config/env.js';
 
 const authorizeMiddleware = async (req: Request, res: Response, next: NextFunction): Promise<any> => {
   const { originalUrl, method } = req;
   req.authorized = authorize(req);
 
+  // If '*' is a key in authorized.routes, the user has wildcard access (e.g. admin).
+  // Use '*' as the lookup key so the wildcard grant matches any route.
   const route = typeof req.authorized.routes['*'] === 'undefined' ? originalUrl : '*';
   const methods = req.authorized.routes?.[route] || [];
 
@@ -16,7 +19,7 @@ const authorizeMiddleware = async (req: Request, res: Response, next: NextFuncti
     return next();
   }
 
-  // 404 handler
+  // route really doesn't exist - 404 handler
   if (typeof validRoutes?.[route] === 'undefined' || !validRoutes[route].includes(method)) {
     return error404Middleware(req, res, next);
   }
@@ -28,9 +31,15 @@ const authorizeMiddleware = async (req: Request, res: Response, next: NextFuncti
     });
   }
 
-  return res.status(401).json({
-    authenticated: req.authenticated,
-  });
+  // In prod: return 404 (anti-enumeration — don't reveal the route exists to unauthenticated users).
+  // In dev: return 401 so it's obvious the request is failing due to missing authentication.
+  if (IS_DEVELOPMENT) {
+    return res.status(401).json({ 
+      authenticated: false, 
+      authorized: false 
+    });
+  }
+  return error404Middleware(req, res, next);
 };
 
 export default authorizeMiddleware;
