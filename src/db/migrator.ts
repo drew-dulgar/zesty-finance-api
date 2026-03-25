@@ -1,10 +1,9 @@
-import * as path from 'path';
-import { promises as fs } from 'fs';
+import { promises as fs } from 'node:fs';
+import * as path from 'node:path';
 import {
-  Kysely,
-  Migrator,
   FileMigrationProvider,
-  MigrationResultSet
+  type MigrationResultSet,
+  Migrator,
 } from 'kysely';
 import { kebabCase } from 'lodash-es';
 
@@ -22,10 +21,14 @@ const migrator = new Migrator({
   }),
 });
 
-export const createMigration = async (migrationName: string[]): Promise<void> => {
-  const migrationCreatedAt = new Date().getTime();
-  const migrationFileName = kebabCase(`${migrationCreatedAt} ${migrationName.join(' ')}`);
-  const migrationFilePath = path.join(migrationsPath, migrationFileName).replace('/dist', '') + '.ts';
+export const createMigration = async (
+  migrationName: string[],
+): Promise<void> => {
+  const migrationCreatedAt = Date.now();
+  const migrationFileName = kebabCase(
+    `${migrationCreatedAt} ${migrationName.join(' ')}`,
+  );
+  const migrationFilePath = `${path.join(migrationsPath, migrationFileName).replace('/dist', '')}.ts`;
 
   const migrationFileContent = `import { Kysely } from 'kysely';
 
@@ -44,23 +47,23 @@ export const down = async (db: Kysely<any>): Promise<void> => {
     console.log(err);
     process.exit(1);
   }
-}
+};
 
 export const migrate = async (method: 'up' | 'down' | 'latest' = 'latest') => {
-  let migration: MigrationResultSet = {error: null, results: []};
+  let migration: MigrationResultSet = { error: null, results: [] };
   let message: string = 'migrated';
 
-  switch(method) {
+  switch (method) {
     case 'up':
       migration = await migrator.migrateUp();
-    break;
+      break;
     case 'down':
       migration = await migrator.migrateDown();
       message = 'migrated down';
-    break;
+      break;
     case 'latest':
       migration = await migrator.migrateToLatest();
-    break;
+      break;
   }
 
   const { error, results } = migration;
@@ -82,7 +85,7 @@ export const migrate = async (method: 'up' | 'down' | 'latest' = 'latest') => {
   } else {
     process.exit(0);
   }
-}
+};
 
 const [, , method, ...args] = process.argv;
 
@@ -99,4 +102,3 @@ switch (method) {
     console.error('Invalid Method Specified');
     process.exit(1);
 }
-

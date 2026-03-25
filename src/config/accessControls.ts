@@ -3,45 +3,46 @@ import type { Request } from 'express';
 type AuthorizeActions = 'create' | 'read' | 'update' | 'delete' | string;
 type AuthorizeMethods = 'POST' | 'GET' | 'PUT' | 'PATCH' | 'DESTROY';
 
-type AuthorizeAccessControlGrantActions = '*' | AuthorizeActions | AuthorizeActions[];
-type AuthorizeAccessControlGrantMethods = '*' | AuthorizeMethods | AuthorizeMethods[];
-
-type AuthorizeAccessControls = {
-  [key: '*' | string]: {
-    selector: (params: Request) => boolean;
-    grants: {
-      [key: string]: {
-        actions?: AuthorizeAccessControlGrantActions;
-        route: string;
-        methods: AuthorizeAccessControlGrantMethods;
-      }
-    }
-  }
-}
+type AuthorizeAccessControlGrantActions =
+  | '*'
+  | AuthorizeActions
+  | AuthorizeActions[];
+type AuthorizeAccessControlGrantMethods =
+  | '*'
+  | AuthorizeMethods
+  | AuthorizeMethods[];
 
 type Aliases = {
   [key: string]: {
     actions?: AuthorizeAccessControlGrantActions;
     methods?: AuthorizeAccessControlGrantMethods;
-  }
-}
+  };
+};
 
-const aliases: Aliases = {
+export const aliases: Aliases = {
   manage: {
-    actions: [
-      'create',
-      'read',
-      'update',
-      'delete'
-    ],
-    methods: [
-      'POST',
-      'GET',
-      'PUT',
-      'PATCH',
-      'DESTROY'
-    ]
-  }
+    actions: ['create', 'read', 'update', 'delete'],
+    methods: ['POST', 'GET', 'PUT', 'PATCH', 'DESTROY'],
+  },
+};
+
+type RouteGrant = {
+  route: string;
+  methods?: AuthorizeAccessControlGrantMethods;
+};
+
+type Grant = {
+  actions?: AuthorizeAccessControlGrantActions;
+  routes?: RouteGrant | RouteGrant[];
+};
+
+type AuthorizeAccessControls = {
+  [key: '*' | string]: {
+    selector: (params: Request) => boolean;
+    grants: {
+      [resource: string]: Grant;
+    };
+  };
 };
 
 const accessControls: AuthorizeAccessControls = {
@@ -49,54 +50,41 @@ const accessControls: AuthorizeAccessControls = {
     selector: () => true,
     grants: {
       account: {
-        actions: 'read',
-        route: '/account',
-        methods: 'GET'
-      }
-    }
+        routes: { route: '/account', methods: 'GET' },
+      },
+    },
   },
   'not-authenticated': {
     selector: ({ authenticated }) => !authenticated,
     grants: {
       auth: {
-        route: '/account/auth',
-        methods: 'POST',
-        actions: 'authenticate'
+        routes: { route: '/auth/*' },
       },
-      account: {
-        route: '/account',
-        methods: 'POST',
-        actions: ['create', 'recover-password'],
-      }
-    }
+    },
   },
   authenticated: {
     selector: ({ authenticated }) => authenticated,
     grants: {
-      logout: {
-        route: '/account/auth',
-        methods: 'DESTROY'
-      },
       account: {
-        route: '/account',
         actions: ['update', 'delete'],
-        methods: ['PUT', 'PATCH', 'DESTROY']
-      }
-    }
+        routes: [
+          { route: '/account', methods: ['PUT', 'PATCH', 'DESTROY'] },
+          { route: '/account/username', methods: ['PATCH'] },
+        ],
+      },
+    },
   },
   admin: {
-    //selector: ({ accountRoles }) => (accountRoles || []).includes('admin'),
-    selector: () => false,
+    selector: ({ account }) =>
+      (account?.roles || []).some((r) => r.label === 'admin'),
     grants: {
       '*': {
         actions: '*',
-        route: '*',
-        methods: '*'
-      }
-    }
-  }
+        routes: { route: '*', methods: '*' },
+      },
+    },
+  },
 };
 
 export default accessControls;
-
-
+export type { AuthorizeAccessControls, Grant, RouteGrant };

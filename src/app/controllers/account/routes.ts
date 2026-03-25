@@ -1,11 +1,20 @@
 import { Router } from 'express';
-import AuthRoutes from './auth/routes.js';
+import { updateUsernameSchema, updateUserSchema } from 'zesty-finance-shared';
+import { validate } from '../../../express/middleware/index.js';
 import AccountController from './AccountController.js';
 
 const router = Router();
-router.use('/auth', AuthRoutes);
 
 router.get('/', AccountController.get);
-router.post('/', AccountController.create);
+router.patch(
+  '/',
+  validate({ body: updateUserSchema }),
+  AccountController.updateProfile,
+);
+router.patch(
+  '/username',
+  validate({ body: updateUsernameSchema }),
+  AccountController.updateUsername,
+);
 
 export default router;

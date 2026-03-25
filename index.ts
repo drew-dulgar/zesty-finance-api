@@ -1,5 +1,5 @@
-import {APP_PORT} from './src/config/env.js';
 import logger from './src/app/lib/logger.js';
+import { APP_PORT } from './src/config/env.js';
 import initializeApplication from './src/express/index.js';
 
 const app = initializeApplication();

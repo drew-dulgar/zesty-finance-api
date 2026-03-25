@@ -10,15 +10,18 @@ const logger = winston.createLogger({
   format: combine(
     colorize({ all: true }),
     timestamp({
-      format: 'MMM-DD-YYYY HH:mm:ss'
+      format: 'MMM-DD-YYYY HH:mm:ss',
     }),
     align(),
-    printf((info) => `[${info.timestamp}] ${info.level}: ${info.message}`)
+    printf((info) => `[${info.timestamp}] ${info.level}: ${info.message}`),
   ),
-  transports: [new Console(), new winston.transports.Http({
-    level: 'warn',
-    format: json()
-  })]
+  transports: [
+    new Console(),
+    new winston.transports.Http({
+      level: 'warn',
+      format: json(),
+    }),
+  ],
 });
 
 export default logger;

@@ -1,11 +1,5 @@
-import type { Account } from './src/app/services/AccountService.js';
-import type  { AuthorizedResponseType } from './src/app/lib/authorize.js';
-
-declare module 'express-session' {
-  interface SessionData {
-    account?: Account;
-  }
-}
+import type { Account } from 'zesty-finance-shared';
+import type { AuthorizedResponseType } from './src/app/lib/authorize.js';
 
 declare global {
   namespace Express {

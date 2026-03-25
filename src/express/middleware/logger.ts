@@ -1,8 +1,12 @@
-import type { Request, Response, NextFunction } from 'express';
+import type { NextFunction, Request, Response } from 'express';
 
 import logger from '../../app/lib/logger.js';
 
-const loggerMiddleware = (req: Request, res: Response, next: NextFunction): void => {
+const loggerMiddleware = (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): void => {
   res.on('finish', () => {
     logger.http(`${req.method} ${req.originalUrl} [${res.statusCode}]`);
   });

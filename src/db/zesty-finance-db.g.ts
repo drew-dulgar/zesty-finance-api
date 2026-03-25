@@ -3,7 +3,7 @@
  * Please do not edit it manually.
  */
 
-import type { Generated, ColumnType } from 'kysely';
+import type { ColumnType, Generated } from 'kysely';
 
 export type Json = JsonValue;
 
@@ -47,69 +47,8 @@ export interface AccountsRole {
   accountRoleId: number;
 }
 
-export interface AssetClass {
-  active: Generated<boolean>;
-  code: string;
-  createdAt: Generated<Timestamp>;
-  deleted: Generated<boolean>;
-  id: Generated<number>;
-  name: string;
-  updatedAt: Generated<Timestamp>;
-}
-
-export interface Locale {
-  active: Generated<boolean>;
-  code: string;
-  createdAt: Generated<Timestamp>;
-  deleted: Generated<boolean>;
-  id: Generated<number>;
-  name: string;
-  updatedAt: Generated<Timestamp>;
-}
-
-export interface Market {
-  active: Generated<boolean>;
-  code: string;
-  createdAt: Generated<Timestamp>;
-  deleted: Generated<boolean>;
-  id: Generated<number>;
-  name: string;
-  updatedAt: Generated<Timestamp>;
-}
-
 export interface Session {
   expired: Timestamp;
   sess: Json;
   sid: string;
-}
-
-export interface Ticker {
-  active: Generated<boolean>;
-  cik: number;
-  compositeFigi: string;
-  createdAt: Generated<Timestamp>;
-  currencyName: string;
-  deleted: Generated<boolean>;
-  delisted: Timestamp | null;
-  id: Generated<number>;
-  lastUpdated: Timestamp;
-  localeId: number;
-  marketId: number;
-  name: string;
-  primaryExchange: string;
-  ticker: string;
-  tickerTypeId: number;
-  updatedAt: Generated<Timestamp>;
-}
-
-export interface TickerType {
-  active: Generated<boolean>;
-  assetClassId: number;
-  code: string;
-  createdAt: Generated<Timestamp>;
-  deleted: Generated<boolean>;
-  description: string;
-  id: Generated<number>;
-  localeId: number;
-  updatedAt: Generated<Timestamp>;
 }

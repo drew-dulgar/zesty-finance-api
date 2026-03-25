@@ -1,33 +1,40 @@
 import type { Request } from 'express';
-
+import type { RouteGrant } from '../../config/accessControls.js';
 import accessControls from '../../config/accessControls.js';
 
 export type AuthorizedResponseType = {
   roles: string[];
   routes: {
     [key: string]: string[];
-  }
+  };
   actions: {
     [key: string]: string[];
-  }
+  };
 };
 
-const validRoutes = {};
+const toArray = <T>(val: T | T[]): T[] => (Array.isArray(val) ? val : [val]);
+const splitOrArray = (val: string | string[]): string[] =>
+  Array.isArray(val) ? val : val.split(',');
+
+const toRoutes = (val: RouteGrant | RouteGrant[]): RouteGrant[] => toArray(val);
+
+const validRoutes: { [route: string]: string[] } = {};
 
 for (const role in accessControls) {
-  const accessControl = accessControls[role];
+  const { grants } = accessControls[role];
 
-  for (const resource in accessControl.grants) {
-    const grant = accessControl.grants[resource];
+  for (const resource in grants) {
+    const { routes } = grants[resource];
+    if (!routes) continue;
 
-    if (!validRoutes?.[grant.route]) {
-      validRoutes[grant.route] = [];
-    }
+    for (const routeGrant of toRoutes(routes)) {
+      if (!validRoutes[routeGrant.route]) {
+        validRoutes[routeGrant.route] = [];
+      }
 
-    if (typeof grant?.methods !== 'undefined') {
-      validRoutes[grant.route].push(
-        ...Array.isArray(grant.methods) ? grant.methods : grant.methods.split(',')
-      );
+      if (routeGrant.methods) {
+        validRoutes[routeGrant.route].push(...splitOrArray(routeGrant.methods));
+      }
     }
   }
 }
@@ -36,7 +43,7 @@ const authorize = (req: Request): AuthorizedResponseType => {
   const authorized: AuthorizedResponseType = {
     roles: [],
     routes: {},
-    actions: {}
+    actions: {},
   };
 
   for (const role in accessControls) {
@@ -46,28 +53,28 @@ const authorize = (req: Request): AuthorizedResponseType => {
       authorized.roles.push(role);
 
       for (const resource in accessControl.grants) {
-        const grant = accessControl.grants[resource];
+        const { actions, routes } = accessControl.grants[resource];
 
-        // Actions
-        if (typeof authorized.actions?.[resource] === 'undefined') {
+        if (!authorized.actions[resource]) {
           authorized.actions[resource] = [];
         }
 
-        if (typeof grant.actions !== 'undefined') {
-          authorized.actions[resource].push(
-            ...Array.isArray(grant.actions) ? grant.actions : grant.actions.split(',')
-          )
+        if (actions) {
+          authorized.actions[resource].push(...splitOrArray(actions));
         }
 
-        // Routes
-        if (typeof authorized.routes?.[grant.route] === 'undefined') {
-          authorized.routes[grant.route] = [];
-        }
+        if (routes) {
+          for (const routeGrant of toRoutes(routes)) {
+            if (!authorized.routes[routeGrant.route]) {
+              authorized.routes[routeGrant.route] = [];
+            }
 
-        if (typeof grant.methods !== 'undefined') {
-          authorized.routes[grant.route].push(
-            ...Array.isArray(grant.methods) ? grant.methods : grant.methods.split(',')
-          );
+            if (routeGrant.methods) {
+              authorized.routes[routeGrant.route].push(
+                ...splitOrArray(routeGrant.methods),
+              );
+            }
+          }
         }
       }
     }

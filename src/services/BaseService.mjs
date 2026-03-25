@@ -1,10 +1,6 @@
 class BaseService {
-  cacheEnabled;
-
   constructor(cacheEnabled = true) {
     this.cacheEnabled = cacheEnabled;
-
-    return this;
   }
 
   setCacheEnabled(cacheEnabled) {
@@ -16,14 +12,17 @@ class BaseService {
   }
 
   columns(tableName, ...columns) {
-    
-    return columns.map(column => `${tableName}.${column}`);
-    
+    return columns.map((column) => `${tableName}.${column}`);
   }
 
-  fetchWithRetry(fetchFunction = new Promise(), maxAttempts = 6, baseDelayMs = 2000, randomness = .05) {
+  fetchWithRetry(
+    fetchFunction = new Promise(),
+    maxAttempts = 6,
+    baseDelayMs = 2000,
+    randomness = 0.05,
+  ) {
     let attempt = 1;
-    
+
     const executeFetch = async () => {
       try {
         return await fetchFunction();
@@ -33,18 +32,17 @@ class BaseService {
         }
 
         const delayMs = baseDelayMs * 2 ** attempt;
-        const delayDiff = (delayMs * randomness);
+        const delayDiff = delayMs * randomness;
         const delayMin = delayMs - delayDiff;
         const delayMax = delayMs + delayDiff;
         const delayRandom = Math.random() * (delayMax - delayMin) + delayMin;
 
         console.log(`Retry attempt ${attempt} after ${delayRandom}ms`);
         await new Promise((resolve) => setTimeout(resolve, delayMs));
-
         attempt++;
         return executeFetch();
       }
-    }
+    };
 
     return executeFetch();
   }
