@@ -1,11 +1,12 @@
 import type { NextFunction, Request, Response } from 'express';
 import type {
   AccountData,
-  AccountUpdateUserInput,
+  AccountUpdateProfileInput,
+  AccountUpdateProfileResponse,
   AccountUpdateUsernameInput,
   AccountUpdateUsernameResponse,
-  AccountUpdateUserResponse,
 } from 'zesty-finance-shared';
+import { emptyStringToNull } from '../../utils/sanitize.js';
 import { AccountRepository } from '../../repositories/index.js';
 
 const get = async (
@@ -26,11 +27,11 @@ const get = async (
 
 const updateProfile = async (
   req: Request,
-  res: Response<AccountUpdateUserResponse>,
+  res: Response<AccountUpdateProfileResponse>,
   next: NextFunction,
 ): Promise<void> => {
   try {
-    const { name, firstName, lastName } = req.body as AccountUpdateUserInput;
+    const { name, firstName, lastName } = req.body as AccountUpdateProfileInput;
     const fields = {
       name,
       ...(firstName !== undefined && { first_name: firstName }),
@@ -50,6 +51,11 @@ const updateUsername = async (
 ): Promise<void> => {
   try {
     const { username } = req.body as AccountUpdateUsernameInput;
+    const taken = await AccountRepository.isUsernameTaken(username, req.account!.id);
+    if (taken) {
+      res.status(409).json({ success: false, error: 'Username is already taken' });
+      return;
+    }
     await AccountRepository.update(req.account!.id, { username });
     res.json({ success: true });
   } catch (error) {

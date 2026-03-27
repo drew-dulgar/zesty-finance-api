@@ -134,6 +134,21 @@ const get = (
   return query;
 };
 
+const isUsernameTaken = async (
+  username: string,
+  excludeId: string,
+  db: Kysely<ZestyFinanceDB> | Transaction<ZestyFinanceDB> = zestyFinanceDb,
+): Promise<boolean> => {
+  const result = await db
+    .selectFrom('accounts')
+    .select('id')
+    .where(sql`lower(username)`, '=', username.toLowerCase())
+    .where('id', '!=', excludeId)
+    .limit(1)
+    .executeTakeFirst();
+  return result !== undefined;
+};
+
 const insert = async (
   values: AccountInsertable,
   db: Kysely<ZestyFinanceDB> | Transaction<ZestyFinanceDB> = zestyFinanceDb,
@@ -191,4 +206,4 @@ const remove = async (
   return result;
 };
 
-export default { get, insert, update, trackSignIn, remove, logs };
+export default { get, isUsernameTaken, insert, update, trackSignIn, remove, logs };
