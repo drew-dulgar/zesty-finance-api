@@ -1,5 +1,8 @@
 import { Router } from 'express';
-import { updateProfileSchema, updateUsernameSchema } from 'zesty-finance-shared';
+import {
+  updateProfileSchema,
+  updateUsernameSchema,
+} from 'zesty-finance-shared';
 import { validate } from '../../../express/middleware/index.js';
 import AccountController from './AccountController.js';
 

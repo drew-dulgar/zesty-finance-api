@@ -6,7 +6,6 @@ import type {
   AccountUpdateUsernameInput,
   AccountUpdateUsernameResponse,
 } from 'zesty-finance-shared';
-import { emptyStringToNull } from '../../utils/sanitize.js';
 import { AccountRepository } from '../../repositories/index.js';
 
 const get = async (
@@ -51,9 +50,14 @@ const updateUsername = async (
 ): Promise<void> => {
   try {
     const { username } = req.body as AccountUpdateUsernameInput;
-    const taken = await AccountRepository.isUsernameTaken(username, req.account!.id);
+    const taken = await AccountRepository.isUsernameTaken(
+      username,
+      req.account!.id,
+    );
     if (taken) {
-      res.status(409).json({ success: false, error: 'Username is already taken' });
+      res
+        .status(409)
+        .json({ success: false, error: 'Username is already taken' });
       return;
     }
     await AccountRepository.update(req.account!.id, { username });

@@ -206,4 +206,12 @@ const remove = async (
   return result;
 };
 
-export default { get, isUsernameTaken, insert, update, trackSignIn, remove, logs };
+export default {
+  get,
+  isUsernameTaken,
+  insert,
+  update,
+  trackSignIn,
+  remove,
+  logs,
+};
