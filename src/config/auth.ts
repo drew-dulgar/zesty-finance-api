@@ -3,6 +3,7 @@ import { betterAuth } from 'better-auth';
 import logger from '../app/lib/logger.js';
 import { AccountRepository } from '../app/repositories/index.js';
 import {
+  emailChangeEmailConfirmation,
   emailResetPassword,
   emailVerifyEmailAddress,
 } from '../app/templates/emails/index.js';
@@ -17,6 +18,7 @@ import {
   BETTER_AUTH_SECRET,
   GOOGLE_CLIENT_ID,
   GOOGLE_CLIENT_SECRET,
+  IS_PRODUCTION,
 } from './env.js';
 import { sendMail } from './mailer.js';
 
@@ -44,7 +46,7 @@ export const auth = betterAuth({
     sendResetPassword: async ({ user, url }) => {
       await sendMail({
         to: user.email,
-        ...emailResetPassword(url),
+        ...emailResetPassword(user, url),
       }).catch((e) => logger.error('sendResetPassword error:', e));
     },
     onPasswordReset: async ({ user }) => {
@@ -57,7 +59,7 @@ export const auth = betterAuth({
     sendVerificationEmail: async ({ user, url }) => {
       await sendMail({
         to: user.email,
-        ...emailVerifyEmailAddress(url),
+        ...emailVerifyEmailAddress(user, url),
       }).catch((e) => logger.error('sendVerificationEmail error:', e));
     },
     afterEmailVerification: async (user) => {
@@ -97,6 +99,15 @@ export const auth = betterAuth({
       isActive: { type: 'boolean', required: false, fieldName: 'is_active' },
       isDeleted: { type: 'boolean', required: false, fieldName: 'is_deleted' },
     },
+    changeEmail: {
+      enabled: true,
+      sendChangeEmailConfirmation: async ({ user, newEmail, url }) => {
+        await sendMail({
+          to: user.email,
+          ...emailChangeEmailConfirmation(user, newEmail, url),
+        }).catch((e) => logger.error('sendChangeEmailConfirmation error:', e));
+      },
+    },
   },
   session: {
     modelName: 'sessions',
@@ -134,6 +145,11 @@ export const auth = betterAuth({
   },
   databaseHooks,
   advanced: {
+    // Enforce __Secure- cookie prefix and secure flag in production.
+    // sameSite stays at the default "lax" — "strict" breaks OAuth redirects
+    // from Google/Apple since cross-site navigations block strict cookies.
+    useSecureCookies: IS_PRODUCTION,
+    cookiePrefix: 'zesty',
     database: {
       generateId: 'uuid',
     },

@@ -52,6 +52,9 @@ const accessControls: AuthorizeAccessControls = {
       account: {
         routes: { route: '/account', methods: 'GET' },
       },
+      documents: {
+        routes: { route: '/documents', methods: 'GET' },
+      },
     },
   },
   'not-authenticated': {
@@ -70,6 +73,8 @@ const accessControls: AuthorizeAccessControls = {
         routes: [
           { route: '/account', methods: ['PUT', 'PATCH', 'DESTROY'] },
           { route: '/account/username', methods: ['PATCH'] },
+          { route: '/account/documents', methods: ['GET'] },
+          { route: '/account/documents/accept', methods: ['POST'] },
         ],
       },
     },

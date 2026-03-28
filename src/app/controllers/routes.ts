@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import AppController from './AppController.js';
+import DocumentController from './DocumentController.js';
 import AccountRoutes from './account/routes.js';
 
 const initializeRoutes = () => {
@@ -8,6 +9,7 @@ const initializeRoutes = () => {
 
   router.get('/health', AppController.health);
   router.get('/favicon.ico', AppController.favicon);
+  router.get('/documents', DocumentController.getActive);
 
   return router;
 };

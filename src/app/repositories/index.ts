@@ -1,4 +1,5 @@
 export { default as AccountHistoryRepository } from './AccountHistoryRepository.js';
+export { default as DocumentRepository } from './DocumentRepository.js';
 export { default as AccountPlanRepository } from './AccountPlanRepository.js';
 export { default as AccountProviderRepository } from './AccountProviderRepository.js';
 export { default as AccountRepository } from './AccountRepository.js';

@@ -4,6 +4,7 @@ import {
   AccountProviderRepository,
   AccountRepository,
   AccountVerificationRepository,
+  DocumentRepository,
   SessionRepository,
 } from '../app/repositories/index.js';
 import { emptyStringToNull } from '../app/utils/sanitize.js';
@@ -15,7 +16,7 @@ const databaseHooks: BetterAuthOptions['databaseHooks'] = {
         return {
           data: {
             ...user,
-            email: emptyStringToNull(user.email),
+            email: emptyStringToNull(user.email.toLocaleLowerCase()),
             username: emptyStringToNull(user.username),
             is_active: true,
           } as Record<string, unknown>,
@@ -25,6 +26,17 @@ const databaseHooks: BetterAuthOptions['databaseHooks'] = {
         await AccountRepository.logs
           .create(user.id, { actor_id: user.id })
           .catch((e) => logger.error('user.create.after hook error:', e));
+
+        await DocumentRepository.getActive()
+          .then((docs) =>
+            DocumentRepository.recordAcceptances(
+              user.id,
+              docs.map((d) => d.id),
+            ),
+          )
+          .catch((e) =>
+            logger.error('user.create.after document acceptance error:', e),
+          );
       },
     },
     update: {

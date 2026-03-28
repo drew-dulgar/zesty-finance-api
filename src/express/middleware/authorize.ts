@@ -9,13 +9,13 @@ const authorizeMiddleware = async (
   res: Response,
   next: NextFunction,
 ): Promise<void> => {
-  const { originalUrl, method } = req;
+  const { path, method } = req;
   req.authorized = authorize(req);
 
   // If '*' is a key in authorized.routes, the user has wildcard access (e.g. admin).
   // Use '*' as the lookup key so the wildcard grant matches any route.
   const route =
-    typeof req.authorized.routes['*'] === 'undefined' ? originalUrl : '*';
+    typeof req.authorized.routes['*'] === 'undefined' ? path : '*';
   const methods = req.authorized.routes?.[route] || [];
 
   // user is authenticated, send 'em on through

@@ -160,7 +160,50 @@ export type LogSelectable = Selectable<LogsTable>;
 export type LogInsertable = Insertable<LogsTable>;
 export type LogUpdateable = Updateable<LogsTable>;
 
+// Document Types — reference table for legal document categories
+export interface DocumentTypesTable {
+  id: Generated<string>;
+  slug: string;
+  name: string;
+  created_at: Generated<Date | string>;
+  updated_at: Generated<Date | string>;
+}
+
+export type DocumentTypeSelectable = Selectable<DocumentTypesTable>;
+export type DocumentTypeInsertable = Insertable<DocumentTypesTable>;
+export type DocumentTypeUpdateable = Updateable<DocumentTypesTable>;
+
+// Documents — versioned legal document content
+export interface DocumentsTable {
+  id: Generated<string>;
+  document_type_id: string;
+  version: string;
+  content: string;
+  effective_date: Date | string;
+  is_active: Generated<boolean>;
+  created_at: Generated<Date | string>;
+  updated_at: Generated<Date | string>;
+}
+
+export type DocumentSelectable = Selectable<DocumentsTable>;
+export type DocumentInsertable = Insertable<DocumentsTable>;
+export type DocumentUpdateable = Updateable<DocumentsTable>;
+
+// Account Document Acceptances — tracks when accounts accept legal documents
+export interface AccountDocumentAcceptancesTable {
+  id: Generated<string>;
+  account_id: string;
+  document_id: string;
+  accepted_at: Generated<Date | string>;
+}
+
+export type AccountDocumentAcceptanceSelectable =
+  Selectable<AccountDocumentAcceptancesTable>;
+export type AccountDocumentAcceptanceInsertable =
+  Insertable<AccountDocumentAcceptancesTable>;
+
 export interface ZestyFinanceDB {
+  account_document_acceptances: AccountDocumentAcceptancesTable;
   accounts: AccountsTable;
   account_history: AccountHistoryTable;
   account_plans: AccountPlansTable;
@@ -168,6 +211,8 @@ export interface ZestyFinanceDB {
   account_roles: AccountRolesTable;
   account_verifications: AccountVerificationsTable;
   accounts_roles: AccountsRolesTable;
+  document_types: DocumentTypesTable;
+  documents: DocumentsTable;
   logs: LogsTable;
   sessions: SessionsTable;
 }

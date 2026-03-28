@@ -5,6 +5,7 @@ import {
 } from 'zesty-finance-shared';
 import { validate } from '../../../express/middleware/index.js';
 import AccountController from './AccountController.js';
+import documentsRouter from './documents/routes.js';
 
 const router = Router();
 
@@ -19,5 +20,6 @@ router.patch(
   validate({ body: updateUsernameSchema }),
   AccountController.updateUsername,
 );
+router.use('/documents', documentsRouter);
 
 export default router;

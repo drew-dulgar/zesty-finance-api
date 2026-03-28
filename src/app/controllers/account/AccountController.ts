@@ -6,7 +6,10 @@ import type {
   AccountUpdateUsernameInput,
   AccountUpdateUsernameResponse,
 } from 'zesty-finance-shared';
-import { AccountRepository } from '../../repositories/index.js';
+import {
+  AccountRepository,
+  DocumentRepository,
+} from '../../repositories/index.js';
 
 const get = async (
   req: Request,
@@ -14,10 +17,28 @@ const get = async (
   next: NextFunction,
 ): Promise<void> => {
   try {
+    const pendingDocuments = req.authenticated
+      ? await DocumentRepository.getPending(req.account!.id).then((docs) =>
+          docs.map((d) => ({
+            id: d.id,
+            version: d.version,
+            content: d.content,
+            effectiveDate: new Date(d.effective_date).toISOString(),
+            isActive: d.is_active,
+            type: {
+              id: d.document_type_id,
+              slug: d.type_slug,
+              name: d.type_name,
+            },
+          })),
+        )
+      : [];
+
     res.send({
       authenticated: req.authenticated,
       authorized: req.authorized.actions || {},
       account: req.account,
+      pendingDocuments,
     });
   } catch (error) {
     next(error);
@@ -67,8 +88,4 @@ const updateUsername = async (
   }
 };
 
-export default {
-  get,
-  updateProfile,
-  updateUsername,
-};
+export default { get, updateProfile, updateUsername };
