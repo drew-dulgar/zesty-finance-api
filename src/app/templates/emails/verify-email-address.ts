@@ -9,7 +9,9 @@ type EmailUser = {
 };
 
 const emailVerifyEmailAddress = (user: EmailUser, url: string) => {
-  const greeting = user.firstName ? `Welcome, ${user.firstName}!` : 'Welcome to Zesty Finance!';
+  const greeting = user.firstName
+    ? `Welcome, ${user.firstName}!`
+    : 'Welcome to Zesty Finance!';
 
   const content = `
     <h2 style="margin:0 0 6px;color:#1B3A5C;font-size:26px;font-weight:800;line-height:1.2;">

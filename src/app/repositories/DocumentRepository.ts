@@ -14,7 +14,10 @@ export type DocumentWithAcceptance = DocumentWithType & {
   accepted_at: Date | null;
 };
 
-const getAcceptedOrActive = (accountId: string, documentTypeSlug: string | undefined): Promise<DocumentWithAcceptance[]> => {
+const getAcceptedOrActive = (
+  accountId: string,
+  documentTypeSlug: string | undefined,
+): Promise<DocumentWithAcceptance[]> => {
   let query = zestyFinanceDb
     .selectFrom('documents as d')
     .innerJoin('document_types as dt', 'dt.id', 'd.document_type_id')
@@ -36,31 +39,33 @@ const getAcceptedOrActive = (accountId: string, documentTypeSlug: string | undef
       'dt.name as type_name',
       'ada.accepted_at',
     ])
-    .where((eb) => eb.or([
-      eb('ada.document_id', 'is not', null),
-      eb('d.is_active', '=', true)
-    ]))
+    .where((eb) =>
+      eb.or([
+        eb('ada.document_id', 'is not', null),
+        eb('d.is_active', '=', true),
+      ]),
+    )
     .orderBy((eb) =>
-      eb.case()
+      eb
+        .case()
         .when(
           eb.and([
             eb('ada.accepted_at', 'is', null),
-            eb('d.is_active', '=', true)
-          ])
+            eb('d.is_active', '=', true),
+          ]),
         )
         .then(0)
         .when(
           eb.and([
             eb('ada.accepted_at', 'is not', null),
-            eb('d.is_active', '=', true)
-          ])
+            eb('d.is_active', '=', true),
+          ]),
         )
         .then(1)
         .else(2)
-        .end()
+        .end(),
     )
-    .orderBy('d.effective_date', 'desc')
-
+    .orderBy('d.effective_date', 'desc');
 
   if (typeof documentTypeSlug !== 'undefined') {
     query = query.where('dt.slug', '=', documentTypeSlug);
@@ -129,9 +134,16 @@ const recordAcceptances = (
     .insertInto('account_document_acceptances')
     .values(values)
     .onConflict((oc) =>
-      oc.constraint('account_document_acceptances_account_document_key').doNothing(),
+      oc
+        .constraint('account_document_acceptances_account_document_key')
+        .doNothing(),
     )
     .execute();
 };
 
-export default { getActive, getAcceptedOrActive, getPending, recordAcceptances };
+export default {
+  getActive,
+  getAcceptedOrActive,
+  getPending,
+  recordAcceptances,
+};

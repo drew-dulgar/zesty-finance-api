@@ -14,8 +14,7 @@ const authorizeMiddleware = async (
 
   // If '*' is a key in authorized.routes, the user has wildcard access (e.g. admin).
   // Use '*' as the lookup key so the wildcard grant matches any route.
-  const route =
-    typeof req.authorized.routes['*'] === 'undefined' ? path : '*';
+  const route = typeof req.authorized.routes['*'] === 'undefined' ? path : '*';
   const methods = req.authorized.routes?.[route] || [];
 
   // user is authenticated, send 'em on through

@@ -4,7 +4,11 @@ type EmailLayoutOptions = {
   content: string;
 };
 
-const emailLayout = ({ title, preheader = '', content }: EmailLayoutOptions): string => `<!DOCTYPE html>
+const emailLayout = ({
+  title,
+  preheader = '',
+  content,
+}: EmailLayoutOptions): string => `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />

@@ -9,7 +9,10 @@ const get = async (
 ): Promise<void> => {
   try {
     const documentType = req.query.documentType as string | undefined;
-    const docs = await DocumentRepository.getAcceptedOrActive(req.account!.id, documentType);
+    const docs = await DocumentRepository.getAcceptedOrActive(
+      req.account!.id,
+      documentType,
+    );
 
     res.json(
       docs.map((d) => ({
